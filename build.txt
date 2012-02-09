@@ -50,7 +50,7 @@ echo
 echo "Synchronize the system clock with an NTP server"
 echo "---------------------------------------------------------------"
 #
-aptitude install ntp ntpdate
+aptitude install -y ntp ntpdate
 #
 echo "Setting the language and charset"
 echo "---------------------------------------------------------------"
@@ -329,6 +329,32 @@ echo "mynetworks = 127.0.0.0/8" >> /etc/postfix/main.cf
 echo
 echo
 echo
+echo "Install mod_evasive"
+# http://www.linuxlog.org/?p=135
+echo "---------------------------------------------------------------"
+read -p "Enter email address to notify in case of a DoS attack: " ADMINEMAIL
+#
+aptitude install -y libapache2-mod-evasive
+#
+mkdir /var/log/mod_evasive
+chown www-data:www-data /var/log/mod_evasive/
+echo '
+<ifmodule mod_evasive20.c>
+DOSHashTableSize 3097
+DOSPageCount 2
+DOSSiteCount 50
+DOSPageInterval 1
+DOSSiteInterval 1
+DOSBlockingPeriod 10
+DOSLogDir /var/log/mod_evasive
+DOSEmailNotify $ADMINEMAIL
+DOSWhitelist 127.0.0.1
+</ifmodule>
+' > /etc/apache2/conf.d/modevasive
+#
+echo
+echo
+echo
 echo "Install MySQL server"
 echo "From - http://library.linode.com/email/postfix/gateway-ubuntu-10.04-lucid"
 echo "---------------------------------------------------------------"
@@ -384,17 +410,28 @@ echo
 aptitude -y install libxml2 libxml2-dev libxml2-utils
 aptitude -y install libaprutil1 libaprutil1-dev
 aptitude -y install libapache-mod-security
-
-# TODO: Still some directory issues
-# may have broken Apache2 config
-
+#
+# https://www.owasp.org/index.php/Category:OWASP_ModSecurity_Core_Rule_Set_Project
+#
 wget http://downloads.sourceforge.net/project/mod-security/modsecurity-crs/0-CURRENT/modsecurity-crs_2.2.3.tar.gz
 tar xzf modsecurity-crs_2.2.3.tar.gz
 mv modsecurity-crs_2.2.3 /etc/apache2/modsecurity-crs
 echo
-echo "Loading base config"
+echo "Loading OWASP base configuration"
 echo
 mv /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf.example /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf
+#
+mkdir /var/log/mod_security/
+touch /var/log/mod_security/audit.log
+touch /var/log/mod_security/debug.log
+#
+echo '
+SecTmpDir /tmp
+SecDataDir /var/log/mod_security
+SecAuditLog /var/log/mod_security/audit.log
+SecDebugLog /var/log/mod_security/debug.log
+' >> /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf
+#
 echo
 echo "Activating select rulesets"
 echo
@@ -416,19 +453,19 @@ echo "
 echo "Fixing backward compatability issue in ModSecurity CRS v2.2.3"
 #
 sed -i "s/REQBODY_ERROR/REQBODY_PROCESSOR_ERROR/g" /etc/apache2/modsecurity-crs/base_rules/modsecurity_crs_20_protocol_violations.conf
-
-# TODO: failban - http://library.linode.com/security/fail2ban
-
-# TODO: look at mod_evasive http://www.linuxlog.org/?p=135 , http://library.linode.com/web-servers/apache/mod-evasive
-
+#
 echo
 echo
 echo
-echo "Install MySQL and MySQL modules"
+echo "Install PHP, MySQL and MySQL modules"
+# https://help.ubuntu.com/community/ApacheMySQLPHP
 echo "--------------------------------------------------------------"
 echo
 #
 aptitude -y install php5 libapache2-mod-php5
+#
+a2enmod php5
+#
 aptitude -y install php5-mysql php5-dev php5-curl php5-gd php5-imagick php5-mcrypt php5-memcache php5-mhash php5-pspell php5-snmp php5-suhosin php5-xmlrpc php5-xsl
 echo '
 extension_dir = "./usr/lib/php5/20090626+lfs/"
