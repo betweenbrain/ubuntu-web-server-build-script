@@ -1,92 +1,34 @@
 Initial server setup
 ====================
 
-Update & Upgrade
+A hand-rolled shell script to help you get up and running quickly  with an Ubuntu web server. While created specifically for 10.04 LTS 32-bit, efforts have been made to make it version agnostic. Please note: This is not intended to be a complete and comprehensive solution, but a starting point for your custom server.
+
+
+
+Basic security and essential packages are included. For security and performance reasons, no GUI based solutions have been included.
+
+Getting started
 ----------------
-    $ sudo apt-get update && sudo apt-get upgrade --show-upgraded
 
-Set Hostname
-------------
-    $ echo "foo" > /etc/hostname
-    $ hostname -F /etc/hostname
+1. Please, please, please review the script line by line. You need to understand what it is doing.
+2. Fire up your VM or VPS, and SSH in as Root.
+3. Create a new script `$ nano build.sh`
+4. Copy/paste the contents of build.txt into your editor.
+5. Make your script executable `$ chmod +x build.sh`
+6. Let 'er rip! `$ ./build.sh` and follow the on-screen prompts.
 
-Update /etc/hosts
+Need a VPS? Grab one at http://www.linode.com/?r=e0368c8dce7aa292de419c36ae0078f64d6d4233
+
+
+Warranty, guarantees, culpability...etc.
+----------------
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+Use at your own risk, I do :)
+
+Copyright
 -----------------
-    $ sudo nano /etc/hosts
+Unless otherwise stated, this software is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 
-    127.0.0.1        localhost.localdomain    localhost
-    12.34.56.78      plato.example.com        plato
-
-Set Timezone
-------------
-    $ dpkg-reconfigure tzdata
-
-Change SSH Port
----------------
-    $ sudo nano /etc/ssh/sshd_config
-
-  - edit Port entry, save
-    $ sudo service ssh restart
-
-  - don't forget to punch a hole in iptables i.e.
-
-    $ sudo nano /etc/iptables.up.rules
-
-  - and change `--dport ##` of a line like the following to add port 1024 `iptables -A INPUT -p tcp -m state --state NEW -m tcp --dport 1024 -j ACCEPT`
-
-  - Now you need to connect like
-
-    $ sftp -oPort=777 user@foo.bar
-
-    $ ssh user@foo.bar -p 777
-
-
-Apache modules
---------------
-    $ sudo a2enmod rewrite
-    $ sudo a2enmod headers
-    $ sudo a2enmod expires
-    $ sudo a2enmod deflate
-    $ sudo a2enmod ssl
-
-mod_security
-------------
-    $ sudo apt-get -y install libapache-mod-security
-    $ sudo nano /etc/apache2/conf.d/modsecurity
-
-    <ifmodule mod_security2.c>
-    Include mod_security_rules/*.conf
-    </ifmodule>
-
-  - create directory for rules and basic set
-
-    $ sudo mkdir /etc/apache2/mod_security_rules
-    $ wget http://www.modsecurity.org/download/modsecurity-apache_2.5.13.tar.gz
-    $ tar xf modsecurity-apache_2.5.13.tar.gz
-    $ sudo mv modsecurity-apache_2.5.13/rules/base_rules/* /etc/apache2/mod_security_rules
-    $ sudo chown -R root:root /etc/apache2/mod_security_rules
-    $ rm -r modsecurity-apache_2.5.13.tar.gz modsecurity-apache_2.5.13/
-
-  - get more rules at http://sourceforge.net/projects/mod-security/files/modsecurity-crs/0-CURRENT/
-
-    $ sudo a2enmod mod-security
-    $ sudo /etc/init.d/apache2 restart
-
-
-Install MySQL
--------------
-    $ sudo apt-get install mysql-server
-    $ sudo mysql_secure_installation
-
-  - Create MySQL databases
-
-    > mysql -u root -p
-    > create database DATABASENAME;
-    > grant all on DATABASENAME.* to 'DBUSER' identified by 'DBPASSWORD';
-    > flush privileges;
-    > quit
-
-Repetative Tasks
-----------------
-See /shell-scripts
+All attempts have been made to identify third party sources, copyrights, and works within in the script. If I missed something, please let me know and I'll fix it.
 
