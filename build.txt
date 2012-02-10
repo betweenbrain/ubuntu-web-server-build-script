@@ -358,8 +358,12 @@ echo "Installing Fail2ban"
 echo "---------------------------------------------------------------"
 #
 aptitude -y install fail2ban
-sed -i "s/ignoreip = 127.0.0.1/ignoreip = 127.0.0.1 $IGNOREIP/g" /etc/fail2ban/jail.conf
-sed -i "s/destemail = root@localhost/destemail = $ADMINEMAIL/g" /etc/fail2ban/jail.conf
+#
+cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+#
+sed -i "s/ignoreip = 127.0.0.1/ignoreip = 127.0.0.1 $IGNOREIP/g" /etc/fail2ban/jail.local
+sed -i "s/destemail = root@localhost/destemail = $ADMINEMAIL/g" /etc/fail2ban/jail.local
+sed -i "s/action = %(action_)s/action = %(action_mw)s/g"/etc/fail2ban/jail.local
 #
 echo
 echo
