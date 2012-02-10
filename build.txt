@@ -50,7 +50,7 @@ echo
 echo "Synchronize the system clock with an NTP server"
 echo "---------------------------------------------------------------"
 #
-aptitude install -y ntp ntpdate
+aptitude install -y ntp ntp
 #
 echo "Setting the language and charset"
 echo "---------------------------------------------------------------"
@@ -79,9 +79,8 @@ sed -i "s/Port 22/Port $SSHPORT/g" /etc/ssh/sshd_config
 echo "Instruct SSH to listen on a specific IP"
 echo "---------------------------------------------------------------"
 echo
-read -p "Enter the IP address SSH be restricted to: " SSHIP
 #
-sed -i "s/#ListenAddress 0.0.0.0/ListenAddress $SSHIP/g" /etc/ssh/sshd_config
+sed -i "s/#ListenAddress 0.0.0.0/ListenAddress $SYSTEMIP/g" /etc/ssh/sshd_config
 #
 echo
 echo "Disabling root ssh login"
@@ -310,20 +309,17 @@ echo "Install and configure postfix as email gateway for sending only"
 echo "---------------------------------------------------------------"
 #
 echo "postfix postfix/main_mailer_type select Internet Site" | debconf-set-selections
-echo "postfix postfix/mailname string $DOMAIN" | debconf-set-selections
+echo "postfix postfix/mailname string $HOSTNAME.$DOMAIN" | debconf-set-selections
 echo "postfix postfix/destinations string localhost.localdomain, localhost" | debconf-set-selections
 #
 aptitude -y install postfix
 #
-rm /etc/aliases
-echo "root: $USER" >> /etc/aliases
-newaliases
+ln -s /usr/bin/mail /bin/mail
+#
 sed -i "s/myhostname =/#myhostname =/g" /etc/postfix/main.cf
-echo "myhostname = $DOMAIN" >> /etc/postfix/main.cf
-sed -i "s/myorigin/#myorigin/g" /etc/postfix/main.cf
-echo 'myorigin = $mydomain' >> /etc/postfix/main.cf
-sed -i "s/mynetworks/#mynetworks/g" /etc/postfix/main.cf
-echo "mynetworks = 127.0.0.0/8" >> /etc/postfix/main.cf
+echo "myhostname = $HOSTNAME" >> /etc/postfix/main.cf
+sed -i "s/#myorigin = \/etc\/mailname/myorigin = $DOMAIN/g" /etc/postfix/main.cf
+#
 /etc/init.d/postfix restart
 #
 echo
@@ -338,7 +334,7 @@ aptitude install -y libapache2-mod-evasive
 #
 mkdir /var/log/mod_evasive
 chown www-data:www-data /var/log/mod_evasive/
-echo '
+echo "
 <ifmodule mod_evasive20.c>
 DOSHashTableSize 3097
 DOSPageCount 2
@@ -350,7 +346,7 @@ DOSLogDir /var/log/mod_evasive
 DOSEmailNotify $ADMINEMAIL
 DOSWhitelist 127.0.0.1
 </ifmodule>
-' > /etc/apache2/conf.d/modevasive
+" > /etc/apache2/conf.d/modevasive
 #
 echo
 echo
@@ -359,7 +355,7 @@ echo "Install MySQL server"
 echo "From - http://library.linode.com/email/postfix/gateway-ubuntu-10.04-lucid"
 echo "---------------------------------------------------------------"
 echo
-read -p "Please enter the MySQL user password: " MYSQLPASSWD
+read -p -s "Please enter the MySQL user password: " MYSQLPASSWD
 #
 echo mysql-server mysql-server/root_password password $MYSQLPASSWD | debconf-set-selections
 echo mysql-server mysql-server/root_password_again password $MYSQPASSWD | debconf-set-selections
@@ -422,14 +418,17 @@ echo
 mv /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf.example /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf
 #
 mkdir /var/log/mod_security/
-touch /var/log/mod_security/audit.log
-touch /var/log/mod_security/debug.log
+
+# TODO: File permission / ownership issues with audit.log, debug.log
+
+# touch /var/log/mod_security/audit.log
+# touch /var/log/mod_security/debug.log
 #
 echo '
 SecTmpDir /tmp
 SecDataDir /var/log/mod_security
-SecAuditLog /var/log/mod_security/audit.log
-SecDebugLog /var/log/mod_security/debug.log
+# SecAuditLog /var/log/mod_security/audit.log
+# SecDebugLog /var/log/mod_security/debug.log
 ' >> /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf
 #
 echo
