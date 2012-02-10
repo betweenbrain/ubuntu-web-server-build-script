@@ -325,12 +325,13 @@ sed -i "s/#myorigin = \/etc\/mailname/myorigin = $DOMAIN/g" /etc/postfix/main.cf
 echo
 echo
 echo
-echo "Install mod_evasive"
+echo "Install mod_evasive and Apache2 Utils"
 # http://www.linuxlog.org/?p=135
 echo "---------------------------------------------------------------"
 read -p "Enter email address to notify in case of a DoS attack: " ADMINEMAIL
+read -p "Enter IP to whitelist from being banned: " IGNOREIP
 #
-aptitude install -y libapache2-mod-evasive
+aptitude install -y libapache2-mod-evasive apache2-utils
 #
 mkdir /var/log/mod_evasive
 chown www-data:www-data /var/log/mod_evasive/
@@ -345,47 +346,19 @@ DOSBlockingPeriod 10
 DOSLogDir /var/log/mod_evasive
 DOSEmailNotify $ADMINEMAIL
 DOSWhitelist 127.0.0.1
+DOSWhitelist $IGNOREIP
 </ifmodule>
 " > /etc/apache2/conf.d/modevasive
 #
 echo
 echo
 echo
-echo "Install MySQL server"
-echo "From - http://library.linode.com/email/postfix/gateway-ubuntu-10.04-lucid"
+echo "Installing Fail2ban"
+# http://library.linode.com/security/fail2ban
 echo "---------------------------------------------------------------"
-echo
-read -p -s "Please enter the MySQL user password: " MYSQLPASSWD
 #
-echo mysql-server mysql-server/root_password password $MYSQLPASSWD | debconf-set-selections
-echo mysql-server mysql-server/root_password_again password $MYSQPASSWD | debconf-set-selections
-aptitude -y install mysql-server && mysql_secure_installation
-#
-echo
-echo
-echo
-echo "Installing Apache"
-echo "---------------------------------------------------------------"
-echo
-# Install Apache
-aptitude -y install apache2
-echo "ServerName $HOSTNAME" > /etc/apache2/conf.d/servername.conf
-sed -i "s/Timeout 300/Timeout 30/g" /etc/apache2/apache2.conf
-apache2ctl graceful
-apache2ctl start
-#
-echo
-echo
-echo
-echo "Enable Apache modules"
-echo "---------------------------------------------------------------"
-echo
-#
-a2enmod rewrite
-a2enmod headers
-a2enmod expires
-a2enmod deflate
-a2enmod ssl
+aptitude -y install fail2ban
+sed -i "s/ignoreip = 127.0.0.1/ignoreip = 127.0.0.1 $IGNOREIP/g" /etc/fail2ban/jail.conf
 #
 echo
 echo
@@ -452,6 +425,32 @@ echo "
 echo "Fixing backward compatability issue in ModSecurity CRS v2.2.3"
 #
 sed -i "s/REQBODY_ERROR/REQBODY_PROCESSOR_ERROR/g" /etc/apache2/modsecurity-crs/base_rules/modsecurity_crs_20_protocol_violations.conf
+#
+echo
+echo
+echo
+echo "Installing Apache"
+echo "---------------------------------------------------------------"
+echo
+# Install Apache
+aptitude -y install apache2
+echo "ServerName $HOSTNAME" > /etc/apache2/conf.d/servername.conf
+sed -i "s/Timeout 300/Timeout 30/g" /etc/apache2/apache2.conf
+apache2ctl graceful
+apache2ctl start
+#
+echo
+echo
+echo
+echo "Enable Apache modules"
+echo "---------------------------------------------------------------"
+echo
+#
+a2enmod rewrite
+a2enmod headers
+a2enmod expires
+a2enmod deflate
+a2enmod ssl
 #
 echo
 echo
