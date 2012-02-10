@@ -304,7 +304,7 @@ aptitude install -y debconf-utils
 echo
 echo
 echo
-echo "Install and configure postfix as email gateway for sending only"
+echo "Install and configure postfix as email gateway (send only)"
 # http://library.linode.com/email/postfix/gateway-ubuntu-10.04-lucid
 echo "---------------------------------------------------------------"
 #
@@ -312,7 +312,7 @@ echo "postfix postfix/main_mailer_type select Internet Site" | debconf-set-selec
 echo "postfix postfix/mailname string $HOSTNAME.$DOMAIN" | debconf-set-selections
 echo "postfix postfix/destinations string localhost.localdomain, localhost" | debconf-set-selections
 #
-aptitude -y install postfix
+aptitude -y install postfix mailutils
 #
 ln -s /usr/bin/mail /bin/mail
 #
