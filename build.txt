@@ -1,4 +1,26 @@
 #!/bin/bash
+#
+#
+#
+# ================================================================== #
+#          Define system specific details in this section            #
+# ================================================================== #
+HOSTNAME=
+SYSTEMIP=
+DOMAIN=
+LANGUAGE=en_GB
+CHARSET=UTF-8
+SSHPORT=
+IGNOREIP=
+USER=
+ADMINEMAIL=
+PUBLICKEY="ssh-rsa ... ... .. foo@bar.com"
+# ================================================================== #
+#                      End system specific details                   #
+# ================================================================== #
+#
+#
+#
 echo
 echo "System updates and basic setup"
 echo "==============================================================="
@@ -7,7 +29,6 @@ echo
 echo
 echo "First things first, let's make sure we have the latest updates."
 echo "---------------------------------------------------------------"
-echo
 #
 aptitude update && aptitude -y safe-upgrade
 #
@@ -16,18 +37,16 @@ echo "Let's set the hostname."
 # http://library.linode.com/getting-started
 echo "---------------------------------------------------------------"
 echo
-read -p "Enter the hostname for this system: " HOSTNAME
 echo
 #
 echo "$HOSTNAME" > /etc/hostname
 hostname -F /etc/hostname
 #
 echo
+echo
+echo
 echo "Now let's update /etc/hosts."
 echo "---------------------------------------------------------------"
-echo
-read -p "Enter the I.P. address of this system: " SYSTEMIP
-read -p "Enter the system FQDN domain.tld (i.e example.com): " DOMAIN
 #
 mv /etc/hosts /etc/hosts.bak
 echo "
@@ -41,22 +60,27 @@ ff02::2 ip6-allrouters
 ff02::3 ip6-allhosts
 " >> /etc/hosts
 #
+echo
+echo
+echo
 echo "Now let's set the proper timezone."
 echo "---------------------------------------------------------------"
 #
 dpkg-reconfigure tzdata
 #
 echo
+echo
+echo
 echo "Synchronize the system clock with an NTP server"
 echo "---------------------------------------------------------------"
 #
-aptitude install -y ntp ntp
+aptitude install -y ntp
 #
+echo
+echo
+echo
 echo "Setting the language and charset"
 echo "---------------------------------------------------------------"
-echo
-read -p "Enter your language (i.e. en_GB): " -e -i en_GB LANGUAGE
-read -p "Enter your charset (i.e. UTF-8): " -e -i UTF-8 CHARSET
 #
 locale-gen $LANGUAGE.$CHARSET
 /usr/sbin/update-locale LANG=$LANGUAGE.$CHARSET
@@ -64,18 +88,20 @@ locale-gen $LANGUAGE.$CHARSET
 echo
 echo
 echo
-echo
 echo "SSH security"
 # https://help.ubuntu.com/community/SSH/OpenSSH/Configuring
 echo "==============================================================="
 echo
+echo
+echo
 echo "Change SSH port"
 echo "---------------------------------------------------------------"
-echo
-read -p "Enter a new port for SSH connections: " SSHPORT
 #
 sed -i "s/Port 22/Port $SSHPORT/g" /etc/ssh/sshd_config
 #
+echo
+echo
+echo
 echo "Instruct SSH to listen on a specific IP"
 echo "---------------------------------------------------------------"
 echo
@@ -83,11 +109,16 @@ echo
 sed -i "s/#ListenAddress 0.0.0.0/ListenAddress $SYSTEMIP/g" /etc/ssh/sshd_config
 #
 echo
+echo
+echo
+echo
 echo "Disabling root ssh login"
 echo "---------------------------------------------------------------"
 #
 sed -i "s/PermitRootLogin yes/PermitRootLogin no/g" /etc/ssh/sshd_config
 #
+echo
+echo
 echo
 echo "Disabling password authentication"
 echo "---------------------------------------------------------------"
@@ -95,22 +126,36 @@ echo "---------------------------------------------------------------"
 sed -i "s/#PasswordAuthentication yes/PasswordAuthentication no/g" /etc/ssh/sshd_config
 #
 echo
+echo
+echo
 echo "Disabling X11 forwarding"
 echo "---------------------------------------------------------------"
 #
 sed -i "s/X11Forwarding yes/X11Forwarding no/g" /etc/ssh/sshd_config
 #
 echo
+echo
+echo
 echo "Disabling use of DNS for ssh"
 echo "---------------------------------------------------------------"
+#
 echo "UseDNS no" >> /etc/ssh/sshd_config
+#
+echo
 echo
 echo
 echo "Creating webmasters group to share with www-data"
-echo
+echo "---------------------------------------------------------------"
+#
 addgroup webmasters
 usermod -G webmasters www-data
+#
 echo
+echo
+echo
+echo "Creating new primary user"
+echo "---------------------------------------------------------------"
+#
 # Script to add a user to Linux system
 # -------------------------------------------------------------------------
 # Copyright (c) 2007 nixCraft project <http://bash.cyberciti.biz/>
@@ -121,8 +166,8 @@ echo
 # http://www.cyberciti.biz/tips/howto-write-shell-script-to-add-user.html
 # -------------------------------------------------------------------------
 if [ $(id -u) -eq 0 ]; then
-	read -p "Enter username of who can connect via SSH: " USER
-	read -s -p "Enter password of that user: " PASSWORD
+	# read -p "Enter username of who can connect via SSH: " USER
+	read -s -p "Enter password of user who can connect via SSH: " PASSWORD
 	egrep "^$USER" /etc/passwd >/dev/null
 	if [ $? -eq 0 ]; then
 		echo "$USER exists!"
@@ -138,6 +183,7 @@ else
 fi
 # End script to add a user to Linux system
 # -------------------------------------------------------------------------
+#
 echo
 echo
 echo
@@ -161,7 +207,8 @@ mv /etc/sudoers.tmp /etc/sudoers
 echo
 echo
 echo
-read -p "Enter public authentication key for that user: " PUBLICKEY
+echo "Adding ssh key"
+echo "---------------------------------------------------------------"
 #
 mkdir /home/$USER/.ssh
 touch /home/$USER/.ssh/authorized_keys
@@ -169,7 +216,10 @@ echo $PUBLICKEY >> /home/$USER/.ssh/authorized_keys
 chown -R $USER:$USER /home/$USER/.ssh
 chmod 700 /home/$USER/.ssh
 chmod 600 /home/$USER/.ssh/authorized_keys
-service ssh reload
+#
+sed -i "s/#AuthorizedKeysFile/AuthorizedKeysFile/g" /etc/ssh/sshd_config
+#
+/etc/init.d/ssh restart
 #
 echo
 echo
@@ -182,12 +232,11 @@ aptitude install -y iptables
 echo
 echo
 echo
-echo "Setting up basic(!) rules for iptables. Uncomment / modify as needed, with care :)"
+echo "Setting up basic(!) rules for iptables. Modify as needed, with care :)"
 # http://www.thegeekstuff.com/scripts/iptables-rules
 # http://wiki.centos.org/HowTos/Network/IPTables
 # https://help.ubuntu.com/community/IptablesHowTo
 echo "---------------------------------------------------------------"
-
 #
 # Flush old rules
 iptables -F
@@ -208,9 +257,6 @@ iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 # Allow loopback access
 iptables -A INPUT -i lo -j ACCEPT
 iptables -A OUTPUT -o lo -j ACCEPT
-
-# Block a specific ip-address
-#iptables -A INPUT -s 192.168.666.666 -j DROP
 
 # Allow incoming HTTP
 iptables -A INPUT -i eth0 -p tcp --dport 80 -m state --state NEW,ESTABLISHED -j ACCEPT
@@ -240,15 +286,11 @@ iptables -A OUTPUT -p icmp --icmp-type echo-reply -j ACCEPT
 # if eth1 is external, eth0 is internal
 iptables -A FORWARD -i eth0 -o eth1 -j ACCEPT
 
-# Allow MySQL connection only from a specific network
-#iptables -A INPUT -i eth0 -p tcp -s 10.5.1.5 --dport 3306 -m state --state NEW,ESTABLISHED -j ACCEPT
-#iptables -A OUTPUT -o eth0 -p tcp --sport 3306 -m state --state ESTABLISHED -j ACCEPT
-
 # Allow Sendmail or Postfix
 iptables -A INPUT -i eth0 -p tcp --dport 25 -m state --state NEW,ESTABLISHED -j ACCEPT
 iptables -A OUTPUT -o eth0 -p tcp --sport 25 -m state --state ESTABLISHED -j ACCEPT
 
-# Prevent DoS attack
+# Help prevent DoS attack
 iptables -A INPUT -p tcp --dport 80 -m limit --limit 25/minute --limit-burst 100 -j ACCEPT
 iptables -A INPUT -p tcp --dport 443 -m limit --limit 25/minute --limit-burst 100 -j ACCEPT
 
@@ -274,15 +316,11 @@ fi
 # Ensure they are executible
 chmod +x /etc/network/if-post-down.d/iptablessave
 chmod +x /etc/network/if-pre-up.d/iptablesload
-
 #
-/etc/init.d./networking restart
-
+/etc/init.d/networking restart
+#
 echo
 echo
-echo
-echo "Misc Customization"
-echo "==============================================================="
 echo
 echo "Adding a bit of color and formatting to the command promt"
 echo "From - http://ubuntuforums.org/showthread.php?t=810590"
@@ -325,14 +363,45 @@ sed -i "s/#myorigin = \/etc\/mailname/myorigin = $DOMAIN/g" /etc/postfix/main.cf
 echo
 echo
 echo
-echo "Install mod_evasive and Apache2 Utils"
+echo "Installing Apache"
+echo "---------------------------------------------------------------"
+echo
+# Install Apache
+aptitude -y install apache2
+echo "ServerName $HOSTNAME" > /etc/apache2/conf.d/servername.conf
+sed -i "s/Timeout 300/Timeout 30/g" /etc/apache2/apache2.conf
+#
+/etc/init.d/apache2 restart
+#
+echo
+echo
+echo
+echo "Enable Apache modules"
+echo "---------------------------------------------------------------"
+echo
+#
+a2enmod rewrite
+a2enmod headers
+a2enmod expires
+a2enmod deflate
+a2enmod ssl
+#
+echo
+echo
+echo
+echo "Installing Apache2 Utils"
+echo "---------------------------------------------------------------"
+#
+aptitude install -y apache2-utils
+#
+echo
+echo
+echo
+echo "Installing mod_evasive"
 # http://www.linuxlog.org/?p=135
 echo "---------------------------------------------------------------"
-read -p "Enter email address to notify in case of a DoS attack: " ADMINEMAIL
-read -p "Enter IP to whitelist from being banned: " IGNOREIP
 #
-aptitude install -y libapache2-mod-evasive apache2-utils
-#
+aptitude install -y libapache2-mod-evasive
 mkdir /var/log/mod_evasive
 chown www-data:www-data /var/log/mod_evasive/
 echo "
@@ -363,14 +432,44 @@ cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
 #
 sed -i "s/ignoreip = 127.0.0.1/ignoreip = 127.0.0.1 $IGNOREIP/g" /etc/fail2ban/jail.local
 sed -i "s/destemail = root@localhost/destemail = $ADMINEMAIL/g" /etc/fail2ban/jail.local
-sed -i "s/action = %(action_)s/action = %(action_mw)s/g"/etc/fail2ban/jail.local
+sed -i "s/action = %(action_)s/action = %(action_mw)s/g" /etc/fail2ban/jail.local
+#
+echo
+echo
+echo
+echo "Adding mod_security monitoring to fail2ban"
+# based on http://www.fail2ban.org/wiki/index.php/HOWTO_fail2ban_with_ModSecurity2.5
+echo "---------------------------------------------------------------"
+#
+echo "
+[modsecurity]
+
+enabled  = true
+filter   = modsecurity
+action   = iptables-multiport[name=ModSecurity, port="http,https"]
+           sendmail-buffered[name=ModSecurity, lines=10, dest=$ADMINEMAIL]
+logpath  = /var/log/apache*/*error.log
+bantime  = 600
+maxretry = 3
+" >> /etc/fail2ban/jail.local
+#
+echo "
+# Fail2Ban configuration file
+#
+# Author: Matt Thomas
+
+[Definition]
+# Match entries like [Mon Feb 13 10:47:12 2012] [error] [client 192.168.0.66] ModSecurity: Warning.
+failregex = [[]client\s<HOST>[]]\sModSecurity\:\sWarning.*
+ignoreregex =
+" > /etc/fail2ban/filter.d/modsecurity.conf
 #
 echo
 echo
 echo
 echo "Basic Apache security"
 echo "---------------------------------------------------------------"
-echo
+#
 sed -i "s/ServerTokens OS/ServerTokens Prod/g" /etc/apache2/conf.d/security
 sed -i "s/ServerSignature On/ServerSignature off/g" /etc/apache2/conf.d/security
 #
@@ -388,7 +487,7 @@ aptitude -y install libapache-mod-security
 echo
 echo
 echo
-echo "Installing OWASP rules for mod_security"
+echo "Fetching OWASP rules for mod_security"
 # https://www.owasp.org/index.php/Category:OWASP_ModSecurity_Core_Rule_Set_Project
 echo "---------------------------------------------------------------"
 #
@@ -399,7 +498,7 @@ mv modsecurity-crs_2.2.3 /etc/apache2/modsecurity-crs
 echo
 echo
 echo
-echo "Loading OWASP base configuration"
+echo "Enabling OWASP example configuration"
 echo "---------------------------------------------------------------"
 #
 mv /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf.example /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf
@@ -407,40 +506,7 @@ mv /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf.example /etc/apac
 echo
 echo
 echo
-echo "Enabling Security Rule Engine with default setting of DetectionOnly.
-Possible settings are On|Off|DetectionOnly. Before changing to On, ensure
-that no false positives occur. For more information about SecRuleEngine, see 
-http://www.modsecurity.org/documentation/modsecurity-apache/2.1.3/html-multipage/03-configuration-directives.html#N106E7"
-# http://sourceforge.net/apps/mediawiki/mod-security/index.php?title=FAQ#Should_I_initially_set_the_SecRuleEngine_to_On.3F
-echo "---------------------------------------------------------------"
-#
-sed -i "s/#SecRuleEngine/SecRuleEngine/g" /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf
-#
-echo
-echo
-echo
-echo "Setting up log dirs"
-echo "---------------------------------------------------------------"
-#
-mkdir /var/log/mod_security/
-# TODO: File permission / ownership issues with audit.log, debug.log
-# touch /var/log/mod_security/audit.log
-# touch /var/log/mod_security/debug.log
-#
-echo '
-SecTmpDir /tmp
-SecDataDir /var/log/mod_security
-# SecAuditLog /var/log/mod_security/audit.log
-# SecDebugLog /var/log/mod_security/debug.log
-CustomLog /var/log/mod_security/custom.log \
-"%h %l %u %t \"%r\" %>s %b %{mod_security-message}i" \
-env=mod_security-relevant
-' >> /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf
-#
-echo
-echo
-echo
-echo "Activating select rulesets"
+echo "Activating additonal select rulesets"
 echo "---------------------------------------------------------------"
 #
 for f in $(ls /etc/apache2/modsecurity-crs/optional_rules/ | grep comment_spam) ; do ln -s /etc/apache2/modsecurity-crs/optional_rules/$f /etc/apache2/modsecurity-crs/activated_rules/$f ; done
@@ -450,6 +516,45 @@ for f in $(ls /etc/apache2/modsecurity-crs/slr_rules/ | grep lfi) ; do ln -s /et
 for f in $(ls /etc/apache2/modsecurity-crs/slr_rules/ | grep xss) ; do ln -s /etc/apache2/modsecurity-crs/slr_rules/$f /etc/apache2/modsecurity-crs/activated_rules/$f ; done
 chown -R root:root /etc/apache2/modsecurity-crs
 rm -r modsecurity-crs_2.2.3.tar.gz
+#
+echo
+echo
+echo
+echo "Enabling security rules engine with default setting of DetectionOnly. Possible settings are On|Off|DetectionOnly. Before changing to On, ensure that no false positives occur. For more information about SecRuleEngine, see http://www.modsecurity.org/documentation/modsecurity-apache/2.1.3/html-multipage/03-configuration-directives.html#N106E7"
+# http://sourceforge.net/apps/mediawiki/mod-security/index.php?title=FAQ#Should_I_initially_set_the_SecRuleEngine_to_On.3F
+echo "---------------------------------------------------------------"
+#
+sed -i "s/#SecRuleEngine DetectionOnly/SecRuleEngine DetectionOnly/g" /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf
+#
+echo
+echo
+echo
+echo "Setting up logs for mod_security"
+echo "---------------------------------------------------------------"
+#
+mkdir /var/log/mod_security/
+# touch /var/log/mod_security/audit.log
+# touch /var/log/mod_security/debug.log
+chown www-data:www-data -R /var/log/mod_security/
+#
+echo "
+SecTmpDir /tmp
+SecDataDir /var/log/mod_security
+# SecAuditLog /var/log/mod_security/audit.log
+# SecDebugLog /var/log/mod_security/debug.log
+" >> /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf
+#
+# echo "
+# mod_security custom log
+# CustomLog /var/log/mod_security/custom.log "%h %l %u %t \"%r\" %>s %b %{mod_security-message}i" env=mod_security-relevant
+# " >> /etc/apache2/apache2.conf
+#
+echo
+echo
+echo
+echo "Enabling mod_security"
+echo "---------------------------------------------------------------"
+#
 echo "
 <IfModule security2_module>
     Include modsecurity-crs/modsecurity_crs_10_config.conf
@@ -458,35 +563,13 @@ echo "
 </IfModule>
 " >> /etc/apache2/conf.d/modsecurity
 #
+echo
+echo
+echo
 echo "Fixing backward compatability issue in ModSecurity CRS v2.2.3"
+echo "---------------------------------------------------------------"
 #
 sed -i "s/REQBODY_ERROR/REQBODY_PROCESSOR_ERROR/g" /etc/apache2/modsecurity-crs/base_rules/modsecurity_crs_20_protocol_violations.conf
-#
-echo
-echo
-echo
-echo "Installing Apache"
-echo "---------------------------------------------------------------"
-echo
-# Install Apache
-aptitude -y install apache2
-echo "ServerName $HOSTNAME" > /etc/apache2/conf.d/servername.conf
-sed -i "s/Timeout 300/Timeout 30/g" /etc/apache2/apache2.conf
-apache2ctl graceful
-apache2ctl start
-#
-echo
-echo
-echo
-echo "Enable Apache modules"
-echo "---------------------------------------------------------------"
-echo
-#
-a2enmod rewrite
-a2enmod headers
-a2enmod expires
-a2enmod deflate
-a2enmod ssl
 #
 echo
 echo
@@ -494,9 +577,10 @@ echo
 echo "Install PHP, MySQL and MySQL modules"
 # https://help.ubuntu.com/community/ApacheMySQLPHP
 echo "--------------------------------------------------------------"
-echo
 #
-aptitude -y install php5 libapache2-mod-php5
+aptitude -y install mysql-server && mysql_secure_installation
+#
+aptitude -y install php5 libapache2-mod-php5 libapache2-mod-auth-mysql
 #
 a2enmod php5
 #
@@ -518,18 +602,34 @@ extension=suhosin.so
 extension=xmlrpc.so
 extension=xsl.so
 ' >> /etc/php5/apache2/php.ini
+
+# TODO: PHP Warning:  PHP Startup: Unable to load dynamic library './usr/lib/php5/20090626+lfs/pdo_mysql.so' - ./usr/lib/php5/20090626+lfs/pdo_mysql.so: undefined symbol: php_pdo_register_driver in Unknown on line 0
+# PHP Warning:  Module 'curl' already loaded in Unknown on line 0
+# PHP Warning:  Module 'gd' already loaded in Unknown on line 0
+# PHP Warning:  Module 'imagick' already loaded in Unknown on line 0
+# PHP Warning:  Module 'mcrypt' already loaded in Unknown on line 0
+# PHP Warning:  Module 'memcache' already loaded in Unknown on line 0
+# PHP Warning:  Module 'mysql' already loaded in Unknown on line 0
+# PHP Warning:  Module 'mysqli' already loaded in Unknown on line 0
+# PHP Warning:  Module 'PDO' already loaded in Unknown on line 0
+# PHP Warning:  Module 'pspell' already loaded in Unknown on line 0
+# PHP Warning:  Module 'snmp' already loaded in Unknown on line 0
+# PHP Warning:  Module 'suhosin' already loaded in Unknown on line 0
+# PHP Warning:  Module 'xmlrpc' already loaded in Unknown on line 0
+# PHP Warning:  Module 'xsl' already loaded in Unknown on line 0
+
 #
 echo
 echo
 echo
-echo "Changing PHP default settings"
+echo "Changing default PHP settings"
 echo "--------------------------------------------------------------"
 echo
 #
 sed -i "s/memory_limit = 128M/memory_limit = 48M/g" /etc/php5/apache2/php.ini
 sed -i "s/upload_max_filesize = 2M/upload_max_filesize = 20M/g" /etc/php5/apache2/php.ini
 #
-apache2ctl graceful
+/etc/init.d/apache2 restart
 #
 echo
 echo
@@ -544,7 +644,7 @@ echo "
   ServerAdmin webmaster@$DOMAIN
   Options FollowSymLinks MultiViews
   DirectoryIndex index.php index.html
-  DocumentRoot /home/$USER/www/$DOMAIN/public_html/
+  DocumentRoot /home/$USER/www/$DOMAIN/public/
   LogLevel warn
   ErrorLog  /home/$USER/www/$DOMAIN/log/error.log
   CustomLog /home/$USER/www/$DOMAIN/log/access.log combined
@@ -558,14 +658,14 @@ echo "Creating web directory structure"
 echo "--------------------------------------------------------------"
 echo
 #
-mkdir -p /home/$USER/www/$DOMAIN/{cgi-bin,log,private,public_html}
+mkdir -p /home/$USER/www/$DOMAIN/{cgi-bin,log,private,public}
 chown -R $USER:webmasters /home/$USER/www && chmod -R g+w /home/$USER/www
 find /home/$USER/www -type d -exec chmod g+s {} \;
-echo "<h1>$DOMAIN works!</h1>" >> /home/$USER/www/$DOMAIN/public_html/index.php
+echo "<h1>$DOMAIN works!</h1>" >> /home/$USER/www/$DOMAIN/public/index.php
 echo "Enabling site, reloading apache"
 a2ensite $DOMAIN
-apache2ctl graceful
-apache2ctl start
+#
+/etc/init.d/apache2 restart
 #
 echo
 echo
@@ -573,7 +673,9 @@ echo
 echo "One final hurrah"
 echo "--------------------------------------------------------------"
 echo
+#
 aptitude update && aptitude -y safe-upgrade
+#
 echo
 echo
 echo
@@ -603,5 +705,4 @@ echo
 echo "If not, now is your (last?) chance to fix things."
 echo
 echo "==============================================================="
-echo
 
