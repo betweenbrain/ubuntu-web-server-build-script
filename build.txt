@@ -377,28 +377,53 @@ sed -i "s/ServerSignature On/ServerSignature off/g" /etc/apache2/conf.d/security
 echo
 echo
 echo
-echo "Installing mod_security with basic ruleset"
+echo "Installing mod_security"
 # http://library.linode.com/web-servers/apache/mod-security
 echo "---------------------------------------------------------------"
-echo
+#
 aptitude -y install libxml2 libxml2-dev libxml2-utils
 aptitude -y install libaprutil1 libaprutil1-dev
 aptitude -y install libapache-mod-security
 #
+echo
+echo
+echo
+echo "Installing OWASP rules for mod_security"
 # https://www.owasp.org/index.php/Category:OWASP_ModSecurity_Core_Rule_Set_Project
+echo "---------------------------------------------------------------"
 #
 wget http://downloads.sourceforge.net/project/mod-security/modsecurity-crs/0-CURRENT/modsecurity-crs_2.2.3.tar.gz
 tar xzf modsecurity-crs_2.2.3.tar.gz
 mv modsecurity-crs_2.2.3 /etc/apache2/modsecurity-crs
+#
+echo
+echo
 echo
 echo "Loading OWASP base configuration"
-echo
+echo "---------------------------------------------------------------"
+#
 mv /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf.example /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf
 #
+echo
+echo
+echo
+echo "Enabling Security Rule Engine with default setting of DetectionOnly.
+Possible settings are On|Off|DetectionOnly. Before changing to On, ensure
+that no false positives occur. For more information about SecRuleEngine, see 
+http://www.modsecurity.org/documentation/modsecurity-apache/2.1.3/html-multipage/03-configuration-directives.html#N106E7"
+# http://sourceforge.net/apps/mediawiki/mod-security/index.php?title=FAQ#Should_I_initially_set_the_SecRuleEngine_to_On.3F
+echo "---------------------------------------------------------------"
+#
+sed -i "s/#SecRuleEngine/SecRuleEngine/g" /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf
+#
+echo
+echo
+echo
+echo "Setting up log dirs"
+echo "---------------------------------------------------------------"
+#
 mkdir /var/log/mod_security/
-
 # TODO: File permission / ownership issues with audit.log, debug.log
-
 # touch /var/log/mod_security/audit.log
 # touch /var/log/mod_security/debug.log
 #
@@ -407,11 +432,17 @@ SecTmpDir /tmp
 SecDataDir /var/log/mod_security
 # SecAuditLog /var/log/mod_security/audit.log
 # SecDebugLog /var/log/mod_security/debug.log
+CustomLog /var/log/mod_security/custom.log \
+"%h %l %u %t \"%r\" %>s %b %{mod_security-message}i" \
+env=mod_security-relevant
 ' >> /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf
 #
 echo
-echo "Activating select rulesets"
 echo
+echo
+echo "Activating select rulesets"
+echo "---------------------------------------------------------------"
+#
 for f in $(ls /etc/apache2/modsecurity-crs/optional_rules/ | grep comment_spam) ; do ln -s /etc/apache2/modsecurity-crs/optional_rules/$f /etc/apache2/modsecurity-crs/activated_rules/$f ; done
 for f in $(ls /etc/apache2/modsecurity-crs/slr_rules/ | grep joomla) ; do ln -s /etc/apache2/modsecurity-crs/slr_rules/$f /etc/apache2/modsecurity-crs/activated_rules/$f ; done
 for f in $(ls /etc/apache2/modsecurity-crs/slr_rules/ | grep rfi) ; do ln -s /etc/apache2/modsecurity-crs/slr_rules/$f /etc/apache2/modsecurity-crs/activated_rules/$f ; done
