@@ -585,39 +585,6 @@ aptitude -y install php5 libapache2-mod-php5 libapache2-mod-auth-mysql
 a2enmod php5
 #
 aptitude -y install php5-mysql php5-dev php5-curl php5-gd php5-imagick php5-mcrypt php5-memcache php5-mhash php5-pspell php5-snmp php5-suhosin php5-xmlrpc php5-xsl
-echo '
-extension_dir = "./usr/lib/php5/20090626+lfs/"
-extension=curl.so
-extension=gd.so
-extension=imagick.so
-extension=mcrypt.so
-extension=memcache.so
-extension=mysqli.so
-extension=mysql.so
-extension=pdo_mysql.so
-extension=pdo.so
-extension=pspell.so
-extension=snmp.so
-extension=suhosin.so
-extension=xmlrpc.so
-extension=xsl.so
-' >> /etc/php5/apache2/php.ini
-
-# TODO: PHP Warning:  PHP Startup: Unable to load dynamic library './usr/lib/php5/20090626+lfs/pdo_mysql.so' - ./usr/lib/php5/20090626+lfs/pdo_mysql.so: undefined symbol: php_pdo_register_driver in Unknown on line 0
-# PHP Warning:  Module 'curl' already loaded in Unknown on line 0
-# PHP Warning:  Module 'gd' already loaded in Unknown on line 0
-# PHP Warning:  Module 'imagick' already loaded in Unknown on line 0
-# PHP Warning:  Module 'mcrypt' already loaded in Unknown on line 0
-# PHP Warning:  Module 'memcache' already loaded in Unknown on line 0
-# PHP Warning:  Module 'mysql' already loaded in Unknown on line 0
-# PHP Warning:  Module 'mysqli' already loaded in Unknown on line 0
-# PHP Warning:  Module 'PDO' already loaded in Unknown on line 0
-# PHP Warning:  Module 'pspell' already loaded in Unknown on line 0
-# PHP Warning:  Module 'snmp' already loaded in Unknown on line 0
-# PHP Warning:  Module 'suhosin' already loaded in Unknown on line 0
-# PHP Warning:  Module 'xmlrpc' already loaded in Unknown on line 0
-# PHP Warning:  Module 'xsl' already loaded in Unknown on line 0
-
 #
 echo
 echo
