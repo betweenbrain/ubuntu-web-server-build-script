@@ -1,7 +1,7 @@
 Initial server setup
 ====================
 
-A hand-rolled shell script to help you get up and running quickly  with an Ubuntu web server. While created specifically for 10.04 LTS 32-bit, efforts have been made to make it version agnostic. Please note: This is not intended to be a complete and comprehensive solution, but a starting point for your custom server.
+A hand-rolled shell script to help you get up and running quickly with an Ubuntu web server. While created specifically for 10.04 LTS 32-bit, efforts have been made to make it version agnostic. Please note: This is not intended to be a complete and comprehensive solution, but a starting point for your custom server.
 
 Basic security and essential packages are included. For security and performance reasons, no GUI based solutions have been included.
 
@@ -16,6 +16,14 @@ Getting started
 6. Let 'er rip! `$ ./build.sh` and follow the on-screen prompts.
 
 Need a VPS? Grab one at [Linode](http://www.linode.com/?r=e0368c8dce7aa292de419c36ae0078f64d6d4233)
+
+What's Next?
+------------
+There are many things to do next, but here are a few ideas:
+  - Grab a copy of mysqltuner.pl and tweak your mysql install `wget http://mysqltuner.pl/mysqltuner.pl` (run with `perl mysqltuner.pl` and follow the recomendations. I.e. `sed -i "s/ssl-key=\/etc\/mysql\/server-key.pem/ssl-key=\/etc\/mysql\/server-key.pem\n\nskip-innodb\n/g" /etc/mysql/my.cnf`)
+  - Keep an eye on your logs and adjust mod_security / fail2ban accordingly
+  - Keep things up to date `sudo aptitude safe-upgrade`
+
 
 
 Warranty, guarantees, culpability...etc.

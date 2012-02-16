@@ -102,11 +102,20 @@ sed -i "s/Port 22/Port $SSHPORT/g" /etc/ssh/sshd_config
 echo
 echo
 echo
-echo "Instruct SSH to listen on a specific IP"
+echo "Instruct sshd to listen only on a specific IP"
 echo "---------------------------------------------------------------"
 echo
 #
 sed -i "s/#ListenAddress 0.0.0.0/ListenAddress $SYSTEMIP/g" /etc/ssh/sshd_config
+#
+echo
+echo
+echo
+echo "Ensure that sshd starts after eth0 is up, not just after filesystem"
+# http://blog.roberthallam.org/2010/06/sshd-not-running-at-startup/
+echo "---------------------------------------------------------------"
+#
+sed -i "s/start on filesystem/start on filesystem and net-device-up IFACE=eth0/g" /etc/init/ssh.conf
 #
 echo
 echo
@@ -323,7 +332,7 @@ echo
 echo
 echo
 echo "Adding a bit of color and formatting to the command promt"
-echo "From - http://ubuntuforums.org/showthread.php?t=810590"
+# http://ubuntuforums.org/showthread.php?t=810590
 echo "---------------------------------------------------------------"
 #
 echo '
@@ -487,13 +496,19 @@ aptitude -y install libapache-mod-security
 echo
 echo
 echo
-echo "Fetching OWASP rules for mod_security"
+echo "Installing subversion"
+echo "---------------------------------------------------------------"
+#
+aptitude install subversion
+#
+echo
+echo
+echo
+echo "Fetching OWASP rules for mod_security via subversion""
 # https://www.owasp.org/index.php/Category:OWASP_ModSecurity_Core_Rule_Set_Project
 echo "---------------------------------------------------------------"
 #
-wget http://downloads.sourceforge.net/project/mod-security/modsecurity-crs/0-CURRENT/modsecurity-crs_2.2.3.tar.gz
-tar xzf modsecurity-crs_2.2.3.tar.gz
-mv modsecurity-crs_2.2.3 /etc/apache2/modsecurity-crs
+svn co https://mod-security.svn.sourceforge.net/svnroot/mod-security/crs/trunk /etc/apache2/modsecurity-crs
 #
 echo
 echo
@@ -533,21 +548,12 @@ echo "Setting up logs for mod_security"
 echo "---------------------------------------------------------------"
 #
 mkdir /var/log/mod_security/
-# touch /var/log/mod_security/audit.log
-# touch /var/log/mod_security/debug.log
 chown www-data:www-data -R /var/log/mod_security/
 #
 echo "
 SecTmpDir /tmp
 SecDataDir /var/log/mod_security
-# SecAuditLog /var/log/mod_security/audit.log
-# SecDebugLog /var/log/mod_security/debug.log
 " >> /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf
-#
-# echo "
-# mod_security custom log
-# CustomLog /var/log/mod_security/custom.log "%h %l %u %t \"%r\" %>s %b %{mod_security-message}i" env=mod_security-relevant
-# " >> /etc/apache2/apache2.conf
 #
 echo
 echo
@@ -584,7 +590,7 @@ aptitude -y install php5 libapache2-mod-php5 libapache2-mod-auth-mysql
 #
 a2enmod php5
 #
-aptitude -y install php5-mysql php5-dev php5-curl php5-gd php5-imagick php5-mcrypt php5-memcache php5-mhash php5-pspell php5-snmp php5-suhosin php5-xmlrpc php5-xsl
+aptitude -y install php5-cli php5-mysql php5-dev php5-curl php5-gd php5-imagick php5-mcrypt php5-memcache php5-mhash php5-pspell php5-suhosin php5-xmlrpc php5-xsl
 #
 echo
 echo
