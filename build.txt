@@ -496,19 +496,14 @@ aptitude -y install libapache-mod-security
 echo
 echo
 echo
-echo "Installing subversion"
-echo "---------------------------------------------------------------"
-#
-aptitude install -y subversion
-#
-echo
-echo
-echo
-echo "Fetching OWASP rules for mod_security via subversion"
+echo "Fetching OWASP rules for mod_security"
 # https://www.owasp.org/index.php/Category:OWASP_ModSecurity_Core_Rule_Set_Project
 echo "---------------------------------------------------------------"
 #
-svn co https://mod-security.svn.sourceforge.net/svnroot/mod-security/crs/trunk /etc/apache2/modsecurity-crs
+wget http://downloads.sourceforge.net/project/mod-security/modsecurity-crs/0-CURRENT/modsecurity-crs_2.2.3.tar.gz
+tar xzf modsecurity-crs_2.2.3.tar.gz
+mv modsecurity-crs_2.2.3 /etc/apache2/modsecurity-crs
+rm -r modsecurity-crs_2.2.3.tar.gz
 #
 echo
 echo
