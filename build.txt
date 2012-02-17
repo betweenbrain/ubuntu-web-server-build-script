@@ -468,8 +468,8 @@ echo "
 # Author: Matt Thomas
 
 [Definition]
-# Match entries like [Mon Feb 13 10:47:12 2012] [error] [client 192.168.0.66] ModSecurity: Warning.
-failregex = [[]client\s<HOST>[]]\sModSecurity\:\sWarning.*
+# Match entries like [Mon Feb 13 10:47:12 2012] [error] [client 192.168.0.66] ModSecurity: Access denied
+failregex = [[]client\s<HOST>[]]\sModSecurity\:\sAccess\sdenied*
 ignoreregex =
 " > /etc/fail2ban/filter.d/modsecurity.conf
 #
