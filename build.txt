@@ -582,27 +582,39 @@ sed -i "s/REQBODY_ERROR/REQBODY_PROCESSOR_ERROR/g" /etc/apache2/modsecurity-crs/
 echo
 echo
 echo
-echo "Install PHP, MySQL and MySQL modules"
+echo "Install PHP, suPHP, MySQL and MySQL modules"
 # https://help.ubuntu.com/community/ApacheMySQLPHP
 echo "--------------------------------------------------------------"
 #
 aptitude -y install mysql-server && mysql_secure_installation
 #
-aptitude -y install php5 libapache2-mod-php5 libapache2-mod-auth-mysql
+aptitude -y install libapache2-mod-suphp libapache2-mod-php5 libapache2-mod-auth-mysql
 #
 a2enmod php5
 #
-aptitude -y install php5-cli php5-mysql php5-dev php5-curl php5-gd php5-imagick php5-mcrypt php5-memcache php5-mhash php5-pspell php5-suhosin php5-xmlrpc php5-xsl
+aptitude -y install php5-cgi php5-cli php5-mysql php5-dev php5-curl php5-gd php5-imagick php5-mcrypt php5-memcache php5-mhash php5-pspell php5-suhosin php5-xmlrpc php5-xsl
+#
+echo "
+# Enable SuPHP
+suPHP_Engine on
+suPHP_AddHandler application/x-httpd-php .php
+" >> /etc/apache2/apache2.conf
+#
+/etc/init.d/apache2 restart
+#
+# sed -i "s/min_uid=100/min_uid=33/g" /etc/suphp/suphp.conf
+# sed -i "s/min_gid=100/min_gid=33/g" /etc/suphp/suphp.conf
 #
 echo
 echo
 echo
-echo "Changing default PHP settings"
+echo "Changing PHP settings"
 echo "--------------------------------------------------------------"
 echo
 #
 sed -i "s/memory_limit = 128M/memory_limit = 48M/g" /etc/php5/apache2/php.ini
 sed -i "s/upload_max_filesize = 2M/upload_max_filesize = 20M/g" /etc/php5/apache2/php.ini
+sed -i "s/output_buffering = 4096/output_buffering = 4096/g" /etc/php5/apache2/php.ini
 #
 /etc/init.d/apache2 restart
 #
