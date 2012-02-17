@@ -23,7 +23,11 @@ There are many things to do next, but here are a few ideas:
   - Grab a copy of mysqltuner.pl and tweak your mysql install `wget http://mysqltuner.pl/mysqltuner.pl` (run with `perl mysqltuner.pl` and follow the recomendations. I.e. `sed -i "s/ssl-key=\/etc\/mysql\/server-key.pem/ssl-key=\/etc\/mysql\/server-key.pem\n\nskip-innodb\n/g" /etc/mysql/my.cnf`)
   - Keep an eye on your logs and adjust mod_security / fail2ban accordingly
   - Keep things up to date `sudo aptitude safe-upgrade`
-
+  - Add a new databse and user:
+    `mysql -u root -p`<br>
+    `mysql> CREATE DATABASE database1;`<br>
+    `mysql> GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES ON database1.* TO 'yourusername'@'localhost' IDENTIFIED BY 'yourpassword';`<br>
+    `mysql> \q`
 
 
 Warranty, guarantees, culpability...etc.

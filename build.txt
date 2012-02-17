@@ -538,6 +538,14 @@ sed -i "s/#SecRuleEngine DetectionOnly/SecRuleEngine DetectionOnly/g" /etc/apach
 echo
 echo
 echo
+echo "Disabling macro support for numeric operators as we need mod_security v2.5.12 for their support"
+echo "---------------------------------------------------------------"
+#
+sed -i "s/SecAction \"phase:1,id:'981211',t:none,nolog,pass,setvar:tx.max_num_args=255\"/#SecAction \"phase:1,id:'981211',t:none,nolog,pass,setvar:tx.max_num_args=255\"/g" /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf
+#
+echo
+echo
+echo
 echo "Setting up logs for mod_security"
 echo "---------------------------------------------------------------"
 #
