@@ -1,7 +1,4 @@
 #!/bin/bash
-#
-#
-#
 # ================================================================== #
 #          Define system specific details in this section            #
 # ================================================================== #
@@ -149,15 +146,6 @@ echo "Disabling use of DNS for ssh"
 echo "---------------------------------------------------------------"
 #
 echo "UseDNS no" >> /etc/ssh/sshd_config
-#
-echo
-echo
-echo
-echo "Creating webmasters group to share with www-data"
-echo "---------------------------------------------------------------"
-#
-addgroup webmasters
-usermod -G webmasters www-data
 #
 echo
 echo
@@ -415,16 +403,16 @@ mkdir /var/log/mod_evasive
 chown www-data:www-data /var/log/mod_evasive/
 echo "
 <ifmodule mod_evasive20.c>
-DOSHashTableSize 3097
-DOSPageCount 2
-DOSSiteCount 50
-DOSPageInterval 1
-DOSSiteInterval 1
-DOSBlockingPeriod 10
-DOSLogDir /var/log/mod_evasive
-DOSEmailNotify $ADMINEMAIL
-DOSWhitelist 127.0.0.1
-DOSWhitelist $IGNOREIP
+    DOSHashTableSize 3097
+    DOSPageCount 2
+    DOSSiteCount 50
+    DOSPageInterval 1
+    DOSSiteInterval 1
+    DOSBlockingPeriod 10
+    DOSLogDir /var/log/mod_evasive
+    DOSEmailNotify $ADMINEMAIL
+    DOSWhitelist 127.0.0.1
+    DOSWhitelist $IGNOREIP
 </ifmodule>
 " > /etc/apache2/conf.d/modevasive
 #
@@ -582,39 +570,39 @@ sed -i "s/REQBODY_ERROR/REQBODY_PROCESSOR_ERROR/g" /etc/apache2/modsecurity-crs/
 echo
 echo
 echo
-echo "Install PHP, suPHP, MySQL and MySQL modules"
+echo "Install MySQL and MySQL modules"
 # https://help.ubuntu.com/community/ApacheMySQLPHP
 echo "--------------------------------------------------------------"
 #
 aptitude -y install mysql-server && mysql_secure_installation
 #
-aptitude -y install libapache2-mod-suphp libapache2-mod-php5 libapache2-mod-auth-mysql
+aptitude -y install libapache2-mod-auth-mysql
 #
-a2enmod php5
+echo
+echo
+echo
+echo "Install PHP, suPHP, and PHP modules"
+# https://help.ubuntu.com/community/ApacheMySQLPHP
+echo "--------------------------------------------------------------"
 #
-aptitude -y install php5-cgi php5-cli php5-mysql php5-dev php5-curl php5-gd php5-imagick php5-mcrypt php5-memcache php5-mhash php5-pspell php5-suhosin php5-xmlrpc php5-xsl
+aptitude -y install libapache2-mod-suphp libapache2-mod-php5 php5-cgi php5-cli php5-mysql php5-curl php5-gd php5-imagick php5-mcrypt php5-memcache php5-mhash php5-pspell php5-suhosin php5-xmlrpc php5-xsl
 #
-echo "
-# Enable SuPHP
-suPHP_Engine on
-suPHP_AddHandler application/x-httpd-php .php
-" >> /etc/apache2/apache2.conf
+a2dismod php5
+#
+a2enmod suphp
 #
 /etc/init.d/apache2 restart
 #
-# sed -i "s/min_uid=100/min_uid=33/g" /etc/suphp/suphp.conf
-# sed -i "s/min_gid=100/min_gid=33/g" /etc/suphp/suphp.conf
-#
 echo
 echo
 echo
-echo "Changing PHP settings"
+echo "Changing PHP settings (we actually won't use these with suPHP though)"
 echo "--------------------------------------------------------------"
 echo
 #
 sed -i "s/memory_limit = 128M/memory_limit = 48M/g" /etc/php5/apache2/php.ini
 sed -i "s/upload_max_filesize = 2M/upload_max_filesize = 20M/g" /etc/php5/apache2/php.ini
-sed -i "s/output_buffering = 4096/output_buffering = 4096/g" /etc/php5/apache2/php.ini
+sed -i "s/output_buffering = 4096/output_buffering = off/g" /etc/php5/apache2/php.ini
 #
 /etc/init.d/apache2 restart
 #
@@ -626,17 +614,30 @@ echo "--------------------------------------------------------------"
 #
 echo "
 <VirtualHost *:80>
-  ServerName  $DOMAIN
-  ServerAlias www.$DOMAIN
-  ServerAdmin webmaster@$DOMAIN
-  Options FollowSymLinks MultiViews
-  DirectoryIndex index.php index.html
-  DocumentRoot /home/$USER/www/$DOMAIN/public/
-  LogLevel warn
-  ErrorLog  /home/$USER/www/$DOMAIN/log/error.log
-  CustomLog /home/$USER/www/$DOMAIN/log/access.log combined
+    ServerName  $DOMAIN
+    ServerAlias www.$DOMAIN
+    ServerAdmin webmaster@$DOMAIN
+    Options FollowSymLinks MultiViews
+    DirectoryIndex index.php index.html
+    suPHP_ConfigPath /home/$USER/public_html/$DOMAIN/
+    DocumentRoot /home/$USER/public_html/$DOMAIN/www/
+    LogLevel warn
+    ErrorLog  /home/$USER/public_html/$DOMAIN/log/error.log
+    CustomLog /home/$USER/public_html/$DOMAIN/log/access.log combined
 </VirtualHost>
 " >> /etc/apache2/sites-available/$DOMAIN
+#
+echo "
+# suPHP_ConfigPath directives - see http://php.net/ini.core
+post_max_size = 20M
+upload_max_filesize = 20M
+max_execution_time = 90
+max_input_time = 90
+memory_limit = 48M
+output_buffering = off
+display_errors = off
+magic_quotes_gpc = off
+" > /home/$USER/public_html/$DOMAIN/php.ini
 #
 echo
 echo
@@ -645,10 +646,9 @@ echo "Creating web directory structure"
 echo "--------------------------------------------------------------"
 echo
 #
-mkdir -p /home/$USER/www/$DOMAIN/{cgi-bin,log,private,public}
-chown -R $USER:webmasters /home/$USER/www && chmod -R g+w /home/$USER/www
-find /home/$USER/www -type d -exec chmod g+s {} \;
-echo "<h1>$DOMAIN works!</h1>" >> /home/$USER/www/$DOMAIN/public/index.php
+mkdir -p /home/$USER/public_html/$DOMAIN/{cgi-bin,log,www}
+echo "<h1>$DOMAIN works!</h1>" >> /home/$USER/public_html/$DOMAIN/www/index.php
+chown -R $USER:$USER /home/$USER/public_html
 echo "Enabling site, reloading apache"
 a2ensite $DOMAIN
 #

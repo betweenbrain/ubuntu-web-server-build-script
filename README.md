@@ -29,6 +29,14 @@ There are many things to do next, but here are a few ideas:
     `mysql> GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES ON database1.* TO 'yourusername'@'localhost' IDENTIFIED BY 'yourpassword';`<br>
     `mysql> \q`
 
+Notes (a.k.a. what I learned)
+-----------------
+###suPHP was a pain to overcome. Here's the deal###
+  - While `php5-cgi` is the package everyone says you need for suPHP, `libapache2-mod-php5` was also needed.
+  - `suPHP_ConfigPath` is needed to be added to each site's VirtualHost, in this case pointed to one level above the web root. This is where we have a php.ini file that contains custom settings (in leau of /etc/php5/apache2/php.ini)
+  - suPHP's default `docroot` is ${HOME}/public_html, whereas mine originally was ${HOME}/www. I changed my convention to match theirs in case of future upgrades overwritting their config file (which could wipe out any changes I make to it).
+
+
 
 Warranty, guarantees, culpability...etc.
 ----------------
