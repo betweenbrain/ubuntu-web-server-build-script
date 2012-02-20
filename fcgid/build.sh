@@ -16,8 +16,6 @@ PUBLICKEY="ssh-rsa ... foo@bar.com"
 #                      End system specific details                   #
 # ================================================================== #
 #
-#
-#
 echo
 echo "System updates and basic setup"
 echo "==============================================================="
@@ -30,7 +28,7 @@ echo "---------------------------------------------------------------"
 aptitude update && aptitude -y safe-upgrade
 #
 echo
-echo "Let's set the hostname."
+echo "Setting the hostname."
 # http://library.linode.com/getting-started
 echo "---------------------------------------------------------------"
 echo
@@ -42,7 +40,7 @@ hostname -F /etc/hostname
 echo
 echo
 echo
-echo "Now let's update /etc/hosts."
+echo "Updating /etc/hosts."
 echo "---------------------------------------------------------------"
 #
 mv /etc/hosts /etc/hosts.bak
@@ -61,7 +59,7 @@ ff02::3 ip6-allhosts
 echo
 echo
 echo
-echo "Now let's set the proper timezone."
+echo "Setting the proper timezone."
 echo "---------------------------------------------------------------"
 #
 dpkg-reconfigure tzdata
@@ -99,7 +97,7 @@ sed -i "s/Port 22/Port $SSHPORT/g" /etc/ssh/sshd_config
 echo
 echo
 echo
-echo "Instruct sshd to listen only on a specific IP"
+echo "Instruct sshd to listen only on a specific IP address."
 echo "---------------------------------------------------------------"
 echo
 #
@@ -142,7 +140,7 @@ sed -i "s/X11Forwarding yes/X11Forwarding no/g" /etc/ssh/sshd_config
 echo
 echo
 echo
-echo "Disabling use of DNS for ssh"
+echo "Disabling sshd DNS resolution"
 echo "---------------------------------------------------------------"
 #
 echo "UseDNS no" >> /etc/ssh/sshd_config
@@ -184,7 +182,7 @@ fi
 echo
 echo
 echo
-echo "Adding to SSH AllowUsers"
+echo "Adding $USER to SSH AllowUsers"
 echo "---------------------------------------------------------------"
 #
 echo "AllowUsers $USER" >> /etc/ssh/sshd_config
@@ -192,7 +190,7 @@ echo "AllowUsers $USER" >> /etc/ssh/sshd_config
 echo
 echo
 echo
-echo "Adding to sudoers"
+echo "Adding $USER to sudoers"
 echo "---------------------------------------------------------------"
 #
 cp /etc/sudoers /etc/sudoers.tmp
@@ -299,17 +297,17 @@ iptables -I INPUT 5 -m limit --limit 5/min -j LOG --log-prefix "Iptables denied:
 iptables -A LOGGING -j DROP
 
 # Create the script to load the rules
-echo '#!/bin/sh
+echo "#!/bin/sh
 iptables-restore < /etc/iptables.rules
-' > /etc/network/if-pre-up.d/iptablesload
+" > /etc/network/if-pre-up.d/iptablesload
 
 # Create the script to save current rules
-echo '#!/bin/sh
+echo "#!/bin/sh
 iptables-save > /etc/iptables.rules
 if [ -f /etc/iptables.downrules ]; then
    iptables-restore < /etc/iptables.downrules
 fi
-' > /etc/network/if-post-down.d/iptablessave
+" > /etc/network/if-post-down.d/iptablessave
 
 # Ensure they are executible
 chmod +x /etc/network/if-post-down.d/iptablessave
@@ -385,12 +383,21 @@ a2dissite default
 echo
 echo
 echo
-echo "Creating website directory structure for $DOMAIN"
+echo "Creating directories for $DOMAIN in $USER's home directory"
 echo "--------------------------------------------------------------"
 #
-mkdir -p /var/www/$DOMAIN/{cgi-bin,log,public_html}
-echo "<h1>$DOMAIN works!</h1>" >> /var/www/$DOMAIN/public_html/index.php
-chown -R $USER:$USER /var/www/$DOMAIN/
+mkdir -p /home/$USER/public_html/$DOMAIN/{cgi-bin,log,www}
+echo "<?php echo '<h1>$DOMAIN works!</h1>'; ?>" > /home/$USER/public_html/$DOMAIN/www/index.php
+#
+echo
+echo
+echo
+echo "Setting correct ownership and permissions for $DOMAIN"
+echo "--------------------------------------------------------------"
+#
+chown -R $USER:$USER /home/$USER/public_html
+find /home/$USER/public_html/$DOMAIN/ -type d -exec chmod 755 {} \;
+find /home/$USER/public_html/$DOMAIN/ -type f -exec chmod 644 {} \;
 #
 echo
 echo
@@ -399,9 +406,8 @@ echo "Creating VirtualHost for $DOMAIN"
 # http://www.howtoforge.com/how-to-set-up-apache2-with-mod_fcgid-and-php5-on-ubuntu-8.10
 echo "--------------------------------------------------------------"
 #
-echo "
-<VirtualHost *:80>
-    DocumentRoot /var/www/$DOMAIN/public_html/
+echo "<VirtualHost *:80>
+    DocumentRoot /home/$USER/public_html/$DOMAIN/www
 
     ServerName  $DOMAIN
     ServerAlias www.$DOMAIN
@@ -409,13 +415,12 @@ echo "
     ServerSignature Off
 
     LogLevel warn
-    ErrorLog  /var/www/$DOMAIN/log/error.log
-    CustomLog /var/www/$DOMAIN/log/access.log combined
+    ErrorLog  /home/$USER/public_html/$DOMAIN/log/error.log
+    CustomLog /home/$USER/public_html/$DOMAIN/log/access.log combined
 
     <IfModule mod_fcgid.c>
         SuexecUserGroup $USER $USER
-        PHP_Fix_Pathinfo_Enable 1
-        <Directory /var/www/$DOMAIN/public_html>
+        <Directory /home/$USER/public_html/$DOMAIN/www>
             Options FollowSymLinks +ExecCGI
             AddHandler fcgid-script .php
             FCGIWrapper /var/www/php-fcgi-scripts/$DOMAIN/php-fcgi-starter .php
@@ -426,7 +431,7 @@ echo "
         </Directory>
     </IfModule>
 </VirtualHost>
-" >> /etc/apache2/sites-available/$DOMAIN
+" > /etc/apache2/sites-available/$DOMAIN
 #
 echo
 echo
@@ -434,8 +439,10 @@ echo
 echo "Creating fcgi wrapper for $DOMAIN, making it executable and setting owner"
 echo "--------------------------------------------------------------"
 #
-echo "
-#!/bin/sh
+mkdir /var/www/php-fcgi-scripts/
+mkdir /var/www/php-fcgi-scripts/$DOMAIN/
+#
+echo "#!/bin/sh
 PHPRC=/etc/php5/cgi/
 export PHPRC
 export PHP_FCGI_MAX_REQUESTS=1000
@@ -450,21 +457,11 @@ chown -R $USER:$USER /var/www/php-fcgi-scripts/$DOMAIN
 echo
 echo
 echo
-echo "Enabling site $DOMAIN, reloading apache"
+echo "Enabling site $DOMAIN, restarting apache"
 echo "--------------------------------------------------------------"
 #
 a2ensite $DOMAIN
 /etc/init.d/apache2 restart
-#
-echo
-echo
-echo
-echo "Tweaking PHP settings"
-echo "--------------------------------------------------------------"
-#
-sed -i "s/memory_limit = 128M/memory_limit = 48M/g" /etc/php5/cgi/php.ini
-sed -i "s/upload_max_filesize = 2M/upload_max_filesize = 20M/g" /etc/php5/cgi/php.ini
-sed -i "s/output_buffering = 4096/output_buffering = off/g" /etc/php5/cgi/php.ini
 #
 echo
 echo
@@ -507,8 +504,13 @@ a2enmod fcgid
 #
 /etc/init.d/apache2 restart
 #
-echo "
-<IfModule mod_fcgid.c>
+echo
+echo
+echo
+echo "Configuring fcgid"
+echo "--------------------------------------------------------------"
+#
+echo "<IfModule mod_fcgid.c>
   AddHandler fcgid-script .fcgi .php
 
   # Where to look for the php.ini file?
@@ -537,6 +539,16 @@ echo "
 </IfModule>
 " > /etc/apache2/conf.d/php-fcgid.conf
 #
+echo
+echo
+echo
+echo "Tweaking PHP settings"
+echo "--------------------------------------------------------------"
+#
+sed -i "s/memory_limit = 128M/memory_limit = 48M/g" /etc/php5/cgi/php.ini
+sed -i "s/upload_max_filesize = 2M/upload_max_filesize = 20M/g" /etc/php5/cgi/php.ini
+sed -i "s/output_buffering = 4096/output_buffering = off/g" /etc/php5/cgi/php.ini
+#
 # ================================================================== #
 #                           Server Security                          #
 # ================================================================== #
@@ -545,16 +557,15 @@ echo
 echo
 echo
 echo "Installing mod_evasive"
-# http://www.linuxlog.org/?p=135
+# http://library.linode.com/web-servers/apache/mod-evasive
 echo "---------------------------------------------------------------"
 #
 aptitude install -y libapache2-mod-evasive
 mkdir /var/log/mod_evasive
 chown www-data:www-data /var/log/mod_evasive/
-echo "
-<ifmodule mod_evasive20.c>
+echo "<ifmodule mod_evasive20.c>
     DOSHashTableSize 3097
-    DOSPageCount 2
+    DOSPageCount 5
     DOSSiteCount 50
     DOSPageInterval 1
     DOSSiteInterval 1
@@ -600,8 +611,7 @@ bantime  = 600
 maxretry = 3
 " >> /etc/fail2ban/jail.local
 #
-echo "
-# Fail2Ban configuration file
+echo "# Fail2Ban configuration file
 #
 # Author: Matt Thomas
 
@@ -676,14 +686,6 @@ sed -i "s/#SecRuleEngine DetectionOnly/SecRuleEngine DetectionOnly/g" /etc/apach
 echo
 echo
 echo
-echo "Disabling macro support for numeric operators as we need mod_security v2.5.12 for their support"
-echo "---------------------------------------------------------------"
-#
-sed -i "s/SecAction \"phase:1,id:'981211',t:none,nolog,pass,setvar:tx.max_num_args=255\"/#SecAction \"phase:1,id:'981211',t:none,nolog,pass,setvar:tx.max_num_args=255\"/g" /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf
-#
-echo
-echo
-echo
 echo "Setting up logs for mod_security"
 echo "---------------------------------------------------------------"
 #
@@ -701,13 +703,20 @@ echo
 echo "Enabling mod_security"
 echo "---------------------------------------------------------------"
 #
-echo "
-<IfModule security2_module>
+echo "<IfModule security2_module>
     Include modsecurity-crs/modsecurity_crs_10_config.conf
     Include modsecurity-crs/base_rules/*.conf
     Include modsecurity-crs/activated_rules/*.conf
 </IfModule>
-" >> /etc/apache2/conf.d/modsecurity
+" > /etc/apache2/conf.d/modsecurity
+#
+echo
+echo
+echo
+echo "Disabling macro support for numeric operators in ModSecurity CRS v2.2.3. We need mod_security v2.5.12 for their support, Lucid uses 2.5.11-1"
+echo "---------------------------------------------------------------"
+#
+sed -i "s/SecAction \"phase:1,id:'981211',t:none,nolog,pass,setvar:tx.max_num_args=255\"/#SecAction \"phase:1,id:'981211',t:none,nolog,pass,setvar:tx.max_num_args=255\"/g" /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf
 #
 echo
 echo
