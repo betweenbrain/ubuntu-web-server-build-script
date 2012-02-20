@@ -220,7 +220,7 @@ sed -i "s/#AuthorizedKeysFile/AuthorizedKeysFile/g" /etc/ssh/sshd_config
 #                               IPtables                             #
 # ================================================================== #
 #
-echo "Installing iptables firewall"
+echo "Installing IPTables firewall"
 echo "---------------------------------------------------------------"
 #
 aptitude install -y iptables
@@ -228,7 +228,7 @@ aptitude install -y iptables
 echo
 echo
 echo
-echo "Setting up basic(!) rules for iptables. Modify as needed, with care :)"
+echo "Setting up basic(!) rules for IPTables. Modify as needed, with care :)"
 # http://www.thegeekstuff.com/scripts/iptables-rules
 # http://wiki.centos.org/HowTos/Network/IPTables
 # https://help.ubuntu.com/community/IptablesHowTo
@@ -314,6 +314,21 @@ chmod +x /etc/network/if-post-down.d/iptablessave
 chmod +x /etc/network/if-pre-up.d/iptablesload
 #
 /etc/init.d/networking restart
+#
+echo
+echo
+echo
+echo "Establish IPTables logging"
+# http://ubuntuforums.org/showthread.php?t=668148
+# https://wiki.ubuntu.com/LucidLynx/ReleaseNotes#line-178
+echo "---------------------------------------------------------------"
+#
+echo "#IPTables logging
+kern.debug;kern.info /var/log/firewall.log
+" > /etc/rsyslog.d/firewall.conf
+#
+/etc/init.d/rsyslog restart
+
 #
 echo
 echo
