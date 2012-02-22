@@ -23,7 +23,7 @@ USER=
 ADMINEMAIL=
 PUBLICKEY="ssh-rsa ... foo@bar.com"
 # ================================================================== #
-# End system specific details
+#                      End system specific details                   #
 # ================================================================== #
 #
 echo
@@ -339,7 +339,6 @@ kern.debug;kern.info /var/log/firewall.log
 " > /etc/rsyslog.d/firewall.conf
 #
 /etc/init.d/rsyslog restart
-
 #
 echo
 echo
@@ -721,6 +720,8 @@ chown www-data:www-data -R /var/log/mod_security/
 echo "
 SecTmpDir /tmp
 SecDataDir /var/log/mod_security
+# SecDebugLog /var/log/mod_security/debug.log
+# SecDebugLogLevel 3
 " >> /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf
 #
 echo
