@@ -36,7 +36,7 @@ This script does a bunch of things. The general run down is that it:
 What's Next?
 ------------
 There are many things to do next (like keep your server up to date!), here are a few ideas:
-- Grab a copy of mysqltuner.pl and tweak your mysql install `wget http://mysqltuner.pl/mysqltuner.pl` (run with `perl mysqltuner.pl` and follow the recommendations. i.e. `sed -i "s/ssl-key=\/etc\/mysql\/server-key.pem/ssl-key=\/etc\/mysql\/server-key.pem\n\nskip-innodb\n/g" /etc/mysql/my.cnf`
+*   Grab a copy of mysqltuner.pl and tweak your mysql install `wget http://mysqltuner.pl/mysqltuner.pl` run with `perl mysqltuner.pl` and follow the recommendations. i.e. `sed -i "s/ssl-key=\/etc\/mysql\/server-key.pem/ssl-key=\/etc\/mysql\/server-key.pem\n\nskip-innodb\n/g" /etc/mysql/my.cnf`
 *   Keep an eye on your logs and adjust mod_security / fail2ban accordingly
 *   Keep things up to date `sudo aptitude safe-upgrade`
 *   Add a new database, with user, with [add-db.sh](https://github.com/betweenbrain/ubuntu-web-server-build-script/admin-scripts/blob/master/add-db.sh)
