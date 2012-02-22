@@ -14,10 +14,10 @@ read -p "Enter new username: " USER
 echo
 read -p -s "Enter password for this user: " PW
 echo
-echo "Creating database $DB and granting access to $USER with password $PW"
 #
 QUERY="CREATE DATABASE $DB;GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES ON $DB.* TO '$USER'@'localhost' IDENTIFIED BY '$PW';"
 mysql -u root -p$MYSQLPW -e "$QUERY"
 #
-echo "Done!"
+echo "Done creating database $DB and granting access to $USER with password $PW"
+#
 

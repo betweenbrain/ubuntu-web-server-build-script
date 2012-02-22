@@ -1,9 +1,14 @@
 #!/bin/bash
-echo "Enter new site domain"
-read DOMAIN
+# ================================================================== #
+# Shell script to add a new site (virtual host)
+# ================================================================== #
+# Copyright (c) 2012 Matt Thomas http://betweenbrain.com
+# This script is licensed under GNU GPL version 2.0 or above
+# ================================================================== #
+#
+read -p "Enter new site domain: " DOMAIN
 echo
-echo "Enter user under which new site will run under"
-read USER
+read -p "Enter user under which new site will run under: " USER
 echo
 echo "<VirtualHost *:80>
     DocumentRoot /home/$USER/public_html/$DOMAIN/www
