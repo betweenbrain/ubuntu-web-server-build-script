@@ -1,7 +1,17 @@
 #!/bin/bash
 # ================================================================== #
+# Ubuntu 10.04 web server build shell script
+# ================================================================== #
+# Parts copyright (c) 2012 Matt Thomas http://betweenbrain.com
+# This script is licensed under GNU GPL version 2.0 or above
+# ================================================================== #
+#
+#
+#
+# ================================================================== #
 #          Define system specific details in this section            #
 # ================================================================== #
+#
 HOSTNAME=
 SYSTEMIP=
 DOMAIN=
@@ -13,7 +23,7 @@ USER=
 ADMINEMAIL=
 PUBLICKEY="ssh-rsa ... foo@bar.com"
 # ================================================================== #
-#                      End system specific details                   #
+# End system specific details
 # ================================================================== #
 #
 echo
@@ -150,7 +160,7 @@ echo
 echo
 echo "Creating new primary user"
 echo "---------------------------------------------------------------"
-#
+# -------------------------------------------------------------------------
 # Script to add a user to Linux system
 # -------------------------------------------------------------------------
 # Copyright (c) 2007 nixCraft project <http://bash.cyberciti.biz/>
@@ -176,6 +186,7 @@ else
 	echo "Only root may add a user to the system"
 	exit 2
 fi
+# -------------------------------------------------------------------------
 # End script to add a user to Linux system
 # -------------------------------------------------------------------------
 #
@@ -333,7 +344,7 @@ kern.debug;kern.info /var/log/firewall.log
 echo
 echo
 echo
-echo "Adding a bit of color and formatting to the command promt"
+echo "Adding a bit of color and formatting to the command prompt"
 # http://ubuntuforums.org/showthread.php?t=810590
 echo "---------------------------------------------------------------"
 #

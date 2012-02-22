@@ -1,42 +1,45 @@
 Initial server setup
 ====================
 
-A hand-rolled shell script to help you get up and running quickly with an Ubuntu web server. While created specifically for 10.04 LTS 32-bit, efforts have been made to make it version agnostic. Please note: This is not intended to be a complete and comprehensive solution, but a starting point for your custom server.
+A hand-rolled bash shell script to help you get up and running quickly with an Ubuntu 10.04 web server.
 
-Basic security and essential packages are included. For security and performance reasons, no GUI based solutions have been included.
+Please note: This is not intended to be a complete and comprehensive solution, but a starting point for your custom server. Tweak, modify and adjust as needed and desired.
+
+Basic security and essential packages are included. For security and performance reasons, no GUI solutions have been included.
 
 Getting started
 ----------------
 
-1. Please, please, please review [build.txt](https://github.com/betweenbrain/ubuntu-web-server-build-script/blob/master/build.txt) line by line. You need to understand what it is doing.
-2. Fire up your VM or VPS, and SSH in as Root.
-3. Create a new script `$ nano build.sh`
-4. Copy/paste the contents of build.txt into your editor.
-5. Make your script executable `$ chmod +x build.sh`
-6. Let 'er rip! `$ ./build.sh` and follow the on-screen prompts.
+1. Before you do anything else, thoroughly review [build.sh](https://github.com/betweenbrain/ubuntu-web-server-build-script/blob/master/build.sh). You need to understand what it is doing.
+2. Then, fire up your VM or VPS with a fresh install of Ubuntu 10.04 on it, connect via SSH and become the Root user.
+3. Upload build.sh to your server -OR- create a new shell script via `$ nano build.sh` and copy/paste the contents of [build.sh](https://github.com/betweenbrain/ubuntu-web-server-build-script/blob/master/build.sh) into it.
+4. Make your script executable `$ chmod +x build.sh`
+5. Let 'er rip! `$ ./build.sh` and follow the on-screen prompts.
 
-Need a VPS? Grab one at [Linode](http://www.linode.com/?r=e0368c8dce7aa292de419c36ae0078f64d6d4233)
+When running this script, please keep an eye on things (they tend happen fast) and keep an eye out for errors. If you see any, please [create an issue report](https://github.com/betweenbrain/ubuntu-web-server-build-script/issues?sort=created&direction=desc&state=open).
+
+Need a VPS? Grab one at [Linode](http://www.linode.com/?r=e0368c8dce7aa292de419c36ae0078f64d6d4233). They rock!
+
+The highlight real
+-----------------
+This script does a bunch of things. The general run down is that it:
+  - Updates your server and configures a number of general settings, such as your hostname, server IP address, timezone ...etc.
+  - Securely configures SSH to listen on a custom port, while restricted to a single IP address, disables root ssh login, disables password access, and grants your new admin user (also a sudoer) ssh access via an SSH key.
+  - Configures IPTables so that you server only accepts and sends data on ports 80, 443 and your custom port for SSH. Also allows sending on port 25 for sendmail/postifx adds a basic DoS rule to IPTables, with logging.
+  - Two scripts are added so that IPTables rules are saved and re-loaded when reboting.
+  - Installs and configures Apache2 (MPM Worker), MySQL, PHP5, suExec, fcgid, as well as creates and enables a new site under your admin user's account.
+  - Installs and configures  mod_evasive, fail2ban, and mod_security. Your admin user's IP address is whitelisted from these security services and a mod_security filter is added to fail2ban. OWASP rules for mod_security v2.2.3 are fetched, configured, and a select set of rules are loaded.
+  NOTE: The OWASP rules are configured for DetectionOnly by default. You need to change that to On when you are comforatble with them.
+  ANOTHER NOTE: As Ubuntu 10.04 uses mod_security v2.5.11-1, a couple of workarounds for backwards compatability issues are implemented. Read the script and see for yourself ;)
 
 What's Next?
 ------------
-There are many things to do next, but here are a few ideas:
+There are many things to do next (like keep your server up to date!), here are a few ideas:
   - Grab a copy of mysqltuner.pl and tweak your mysql install `wget http://mysqltuner.pl/mysqltuner.pl` (run with `perl mysqltuner.pl` and follow the recomendations. I.e. `sed -i "s/ssl-key=\/etc\/mysql\/server-key.pem/ssl-key=\/etc\/mysql\/server-key.pem\n\nskip-innodb\n/g" /etc/mysql/my.cnf`)
   - Keep an eye on your logs and adjust mod_security / fail2ban accordingly
   - Keep things up to date `sudo aptitude safe-upgrade`
-  - Add a new databse and user (https://help.ubuntu.com/community/ApacheMySQLPHP):
-    `mysql -u root -p`<br>
-    `mysql> CREATE DATABASE database1;`<br>
-    `mysql> GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES ON database1.* TO 'yourusername'@'localhost' IDENTIFIED BY 'yourpassword';`<br>
-    `mysql> \q`
-
-Notes (a.k.a. what I learned)
------------------
-###suPHP was a pain to overcome. Here's the deal###
-  - While `php5-cgi` is the package everyone says you need for suPHP, `libapache2-mod-php5` was also needed.
-  - `suPHP_ConfigPath` is needed to be added to each site's VirtualHost, in this case pointed to one level above the web root. This is where we have a php.ini file that contains custom settings (in leau of /etc/php5/apache2/php.ini)
-  - suPHP's default `docroot` is ${HOME}/public_html, whereas mine originally was ${HOME}/www. I changed my convention to match theirs in case of future upgrades overwritting their config file (which could wipe out any changes I make to it).
-
-
+  - Add a new database, with user, with [add-db.sh](https://github.com/betweenbrain/ubuntu-web-server-build-script/admin-scripts/blob/master/add-db.sh)
+  - Did I mention that you should keep things up to date?
 
 Warranty, guarantees, culpability...etc.
 ----------------
@@ -44,7 +47,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 Use at your own risk, I do :)
 
-Copyright
+Parts copyright
 -----------------
 Unless otherwise stated, this software is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 
