@@ -533,6 +533,7 @@ echo
 echo
 echo
 echo "Configuring fcgid"
+# http://2bits.com/articles/apache-fcgid-acceptable-performance-and-better-resource-utilization.html
 echo "--------------------------------------------------------------"
 #
 echo "<IfModule mod_fcgid.c>
@@ -740,7 +741,7 @@ echo "<IfModule security2_module>
 echo
 echo
 echo
-echo "Disabling macro support for numeric operators in ModSecurity CRS v2.2.3. We need mod_security v2.5.12 for their support, Lucid uses 2.5.11-1"
+echo "Disabling macro support for numeric operators in ModSecurity CRS v2.2.3. We need ModSecurity 2.5.12 for their support, Lucid uses 2.5.11-1"
 echo "---------------------------------------------------------------"
 #
 sed -i "s/SecAction \"phase:1,id:'981211',t:none,nolog,pass,setvar:tx.max_num_args=255\"/#SecAction \"phase:1,id:'981211',t:none,nolog,pass,setvar:tx.max_num_args=255\"/g" /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf
@@ -748,7 +749,16 @@ sed -i "s/SecAction \"phase:1,id:'981211',t:none,nolog,pass,setvar:tx.max_num_ar
 echo
 echo
 echo
-echo "Fixing backward compatability issue in ModSecurity CRS v2.2.3"
+echo "Hardcoding a numeric value in place of disabled tx.max_num_args operator"
+echo "---------------------------------------------------------------"
+#
+sed -i "s/%{tx.max_num_args}/255/g" /etc/apache2/modsecurity-crs/base_rules/modsecurity_crs_23_request_limits.conf
+#
+echo
+echo
+echo
+echo "Fixing backward compatability issue in ModSecurity CRS v2.2.3. REQBODY_ERROR renamed to  REQBODY_PROCESSOR_ERROR in ModSecurity 2.6.0"
+# http://permalink.gmane.org/gmane.comp.apache.mod-security.owasp-crs/411
 echo "---------------------------------------------------------------"
 #
 sed -i "s/REQBODY_ERROR/REQBODY_PROCESSOR_ERROR/g" /etc/apache2/modsecurity-crs/base_rules/modsecurity_crs_20_protocol_violations.conf
