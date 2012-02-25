@@ -505,6 +505,7 @@ echo "---------------------------------------------------------------"
 #
 wget https://dl-ssl.google.com/dl/linux/direct/mod-pagespeed-beta_current_i386.deb
 dpkg -i mod-pagespeed-*.deb
+rm mod-pagespeed-beta_current_i386.deb
 #
 echo
 echo
