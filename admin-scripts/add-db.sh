@@ -6,13 +6,13 @@
 # This script is licensed under GNU GPL version 2.0 or above
 # ================================================================== #
 #
-read -p -s "Enter your MySQL user password: " MYSQLPW
+read -s -p "Enter your MySQL user password: " MYSQLPW
 echo
 read -p "Enter new database name: " DB
 echo
 read -p "Enter new username: " USER
 echo
-read -p -s "Enter password for this user: " PW
+read -s -p "Enter password for this user: " PW
 echo
 #
 QUERY="CREATE DATABASE $DB;GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES ON $DB.* TO '$USER'@'localhost' IDENTIFIED BY '$PW';"
