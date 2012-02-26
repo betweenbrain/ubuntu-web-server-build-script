@@ -550,28 +550,35 @@ echo "<IfModule mod_fcgid.c>
   AddHandler fcgid-script .fcgi .php
 
   # Where to look for the php.ini file?
-  DefaultInitEnv PHPRC        "/etc/php5/cgi"
+  DefaultInitEnv PHPRC		"/etc/php5/cgi"
 
   # Maximum requests a process handles before it is terminated
-  MaxRequestsPerProcess       1000
+  MaxRequestsPerProcess		1000
 
   # Maximum number of PHP processes
-  MaxProcessCount             10
+  MaxProcessCount			10
 
   # Number of seconds of idle time before a process is terminated
-  IPCCommTimeout              240
-  IdleTimeout                 240
+  IPCCommTimeout			240
+  IdleTimeout				240
 
   #Or use this if you use the file above
   FCGIWrapper /usr/bin/php-cgi .php
 
-  ServerLimit           500
-  StartServers            3
-  MinSpareThreads         3
-  MaxSpareThreads        10
-  ThreadsPerChild        10
-  MaxClients            300
-  MaxRequestsPerChild  1000
+  ServerLimit				500
+  
+  StartServers				3
+  
+  MinSpareThreads			3
+  
+  MaxSpareThreads			10
+  
+  ThreadsPerChild			10
+  
+  # MaxClients = ThreadsPerChild x 16
+  MaxClients				160
+  
+  MaxRequestsPerChild		1000
 </IfModule>
 " > /etc/apache2/conf.d/php-fcgid.conf
 #
