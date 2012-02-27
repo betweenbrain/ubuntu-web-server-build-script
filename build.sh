@@ -470,8 +470,8 @@ mkdir /var/www/php-fcgi-scripts/$DOMAIN/
 echo "#!/bin/sh
 PHPRC=/etc/php5/cgi/
 export PHPRC
-export PHP_FCGI_MAX_REQUESTS=1000
-export PHP_FCGI_CHILDREN=10
+export PHP_FCGI_MAX_REQUESTS=5000
+export PHP_FCGI_CHILDREN=1
 exec /usr/lib/cgi-bin/php
 " > /var/www/php-fcgi-scripts/$DOMAIN/php-fcgi-starter
 #
@@ -543,44 +543,74 @@ echo
 echo
 echo
 echo "Configuring fcgid"
-# http://2bits.com/articles/apache-fcgid-acceptable-performance-and-better-resource-utilization.html
 echo "--------------------------------------------------------------"
 #
 echo "<IfModule mod_fcgid.c>
   AddHandler fcgid-script .fcgi .php
 
   # Where to look for the php.ini file?
-  DefaultInitEnv PHPRC		"/etc/php5/cgi"
-
-  # Maximum requests a process handles before it is terminated
-  MaxRequestsPerProcess		1000
+  DefaultInitEnv PHPRC        "/etc/php5/cgi"
 
   # Maximum number of PHP processes
-  MaxProcessCount			10
+  # Default 1000
+  FcgidMaxProcesses         10
 
   # Number of seconds of idle time before a process is terminated
-  IPCCommTimeout			240
-  IdleTimeout				240
+  # Default 40
+  FcgidIOTimeout            30
+  # Default 300
+  FcgidIdleTimeout          120
 
   #Or use this if you use the file above
   FCGIWrapper /usr/bin/php-cgi .php
-
-  ServerLimit				500
-  
-  StartServers				3
-  
-  MinSpareThreads			3
-  
-  MaxSpareThreads			10
-  
-  ThreadsPerChild			10
-  
-  # MaxClients = ThreadsPerChild x 16
-  MaxClients				160
-  
-  MaxRequestsPerChild		1000
 </IfModule>
 " > /etc/apache2/conf.d/php-fcgid.conf
+#
+echo
+echo
+echo
+echo "Configuring apach mpm worker module"
+echo "--------------------------------------------------------------"
+#
+echo "<IfModule mpm_worker_module>
+    # Combined with ThreadLimit to set maximum configured value for MaxClients
+    # Default 16
+    # ServerLimit           16
+
+    # Sets the maximum configured value for ThreadsPerChild
+    # Default 64
+    # ThreadLimit           64
+
+    # Number of child server processes created on startup
+    # Default 3
+    StartServers            2
+
+    # Minimum number of idle threads to handle request spikes
+    # Default 75
+    MinSpareThreads         5
+
+    # Minimum number of idle threads to handle request spikes
+    # Default 250
+    MaxSpareThreads         10
+
+    # Number of threads created by each child process
+    # Default 25
+    ThreadsPerChild         10
+
+    # Number of simultaneous requests that will be served, integer multiple of ThreadsPerChild
+    # Default 16
+    # Linode 512: MaxClients 25 or less
+    # Linode 1024: MaxClients 50 or less
+    # Linode 1536: MaxClients 75 or less
+    # Linode 2048: MaxClients 100 or less
+    MaxClients              20
+
+    # Number of requests that an individual child server process will handle
+    # Default 1000
+    # 0 = process will never expire
+    MaxRequestsPerChild     100
+</IfModule>
+"  > /etc/apache2/conf.d/mpm-worker.conf
 #
 echo
 echo
