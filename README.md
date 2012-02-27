@@ -39,7 +39,13 @@ What's Next?
 ------------
 Here are a few ideas:
 
-*   Grab a copy of mysqltuner.pl and tweak your mysql install `wget http://mysqltuner.pl/mysqltuner.pl` run with `perl mysqltuner.pl` and follow the recommendations. i.e. `sed -i "s/ssl-key=\/etc\/mysql\/server-key.pem/ssl-key=\/etc\/mysql\/server-key.pem\n\nskip-innodb\n/g" /etc/mysql/my.cnf`
+*   Grab a copy of mysqltuner.pl and tweak your mysql install `wget http://mysqltuner.pl/mysqltuner.pl` run with `perl mysqltuner.pl` and follow the recommendations. Some may include:
+  *   Disable innob: `sed -i "s/ssl-key=\/etc\/mysql\/server-key.pem/ssl-key=\/etc\/mysql\/server-key.pem\n\nskip-innodb\n/g" /etc/mysql/my.cnf`
+  *   Limit MySQL queries: `sed -i "s/#max_connections/max_connections/g" /etc/mysql/my.cnf`
+  *   Enable slow query logging: `sed -i "s/#log_slow_queries/log_slow_queries/g" /etc/mysql/my.cnf`<br>
+`sed -i "s/#long_query_time/long_query_time/g" /etc/mysql/my.cnf`
+  *   Set query cache type: `sed -i "s/query_cache_size        = 16M/query_cache_size        = 16M\nquery_cache_type        = 1\n/g" /etc/mysql/my.cnf`
+  *   Enable table cache: `sed -i "s/#table_cache/table_cache/g" /etc/mysql/my.cnf`
 *   Keep an eye on your logs and adjust mod_security / fail2ban accordingly
 *   Keep things up to date. For example `sudo aptitude safe-upgrade`
 *   Add a new database, with a corresponding user, with [add-db.sh](https://github.com/betweenbrain/ubuntu-web-server-build-script/blob/master/admin-scripts/add-db.sh)
