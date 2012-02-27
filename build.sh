@@ -497,15 +497,15 @@ echo
 #
 a2enmod rewrite headers expires deflate ssl suexec
 #
-echo
-echo
-echo
-echo "Installing mod_pagespeed"
-echo "---------------------------------------------------------------"
+# echo
+# echo
+# echo
+# echo "Installing mod_pagespeed"
+# echo "---------------------------------------------------------------"
 #
-wget https://dl-ssl.google.com/dl/linux/direct/mod-pagespeed-beta_current_i386.deb
-dpkg -i mod-pagespeed-*.deb
-rm mod-pagespeed-beta_current_i386.deb
+# wget https://dl-ssl.google.com/dl/linux/direct/mod-pagespeed-beta_current_i386.deb
+# dpkg -i mod-pagespeed-*.deb
+# rm mod-pagespeed-beta_current_i386.deb
 #
 echo
 echo
