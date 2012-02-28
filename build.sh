@@ -497,15 +497,98 @@ echo
 #
 a2enmod rewrite headers expires deflate ssl suexec
 #
-# echo
-# echo
-# echo
-# echo "Installing mod_pagespeed"
-# echo "---------------------------------------------------------------"
+echo
+echo
+echo
+echo "Disable Apache modules"
+echo "---------------------------------------------------------------"
+echo
 #
-# wget https://dl-ssl.google.com/dl/linux/direct/mod-pagespeed-beta_current_i386.deb
-# dpkg -i mod-pagespeed-*.deb
-# rm mod-pagespeed-beta_current_i386.deb
+a2dismod status cgid
+#
+#
+echo
+echo
+echo
+echo "Add mod_expires configuration"
+# https://akeeba.assembla.com/code/master-htaccess/git/nodes/htaccess.txt
+echo "---------------------------------------------------------------"
+#
+echo "<IfModule mod_expires.c>
+        # Enable expiration control
+        ExpiresActive On
+
+        # Default expiration: 1 hour after request
+        ExpiresDefault "now plus 1 hour"
+
+        # CSS and JS expiration: 1 week after request
+        ExpiresByType text/css "now plus 1 week"
+        ExpiresByType application/javascript "now plus 1 week"
+        ExpiresByType application/x-javascript "now plus 1 week"
+
+        # Image files expiration: 1 month after request
+        ExpiresByType image/bmp "now plus 1 month"
+        ExpiresByType image/gif "now plus 1 month"
+        ExpiresByType image/jpeg "now plus 1 month"
+        ExpiresByType image/jp2 "now plus 1 month"
+        ExpiresByType image/pipeg "now plus 1 month"
+        ExpiresByType image/png "now plus 1 month"
+        ExpiresByType image/svg+xml "now plus 1 month"
+        ExpiresByType image/tiff "now plus 1 month"
+        ExpiresByType image/vnd.microsoft.icon "now plus 1 month"
+        ExpiresByType image/x-icon "now plus 1 month"
+        ExpiresByType image/ico "now plus 1 month"
+        ExpiresByType image/icon "now plus 1 month"
+        ExpiresByType text/ico "now plus 1 month"
+        ExpiresByType application/ico "now plus 1 month"
+        ExpiresByType image/vnd.wap.wbmp "now plus 1 month"
+        ExpiresByType application/vnd.wap.wbxml "now plus 1 month"
+        ExpiresByType application/smil "now plus 1 month"
+
+        # Audio files expiration: 1 month after request
+        ExpiresByType audio/basic "now plus 1 month"
+        ExpiresByType audio/mid "now plus 1 month"
+        ExpiresByType audio/midi "now plus 1 month"
+        ExpiresByType audio/mpeg "now plus 1 month"
+        ExpiresByType audio/x-aiff "now plus 1 month"
+        ExpiresByType audio/x-mpegurl "now plus 1 month"
+        ExpiresByType audio/x-pn-realaudio "now plus 1 month"
+        ExpiresByType audio/x-wav "now plus 1 month"
+
+        # Movie files expiration: 1 month after request
+        ExpiresByType application/x-shockwave-flash "now plus 1 month"
+        ExpiresByType x-world/x-vrml "now plus 1 month"
+        ExpiresByType video/x-msvideo "now plus 1 month"
+        ExpiresByType video/mpeg "now plus 1 month"
+        ExpiresByType video/mp4 "now plus 1 month"
+        ExpiresByType video/quicktime "now plus 1 month"
+        ExpiresByType video/x-la-asf "now plus 1 month"
+        ExpiresByType video/x-ms-asf "now plus 1 month"
+</IfModule>
+" >> /etc/apache2/conf.d/mod-expires.conf
+#
+echo
+echo
+echo
+echo "Add mod_deflate configuration"
+# https://akeeba.assembla.com/code/master-htaccess/git/nodes/htaccess.txt
+echo "---------------------------------------------------------------"
+#
+echo "<IfModule mod_deflate.c>
+AddOutputFilterByType DEFLATE text/plain text/html text/xml text/css application/xml application/xhtm$
+</IfModule>
+" >> /etc/apache2/conf.d/mod-deflate.conf
+#
+echo
+echo
+echo
+echo "Custom Apache2 settings"
+echo "---------------------------------------------------------------"
+#
+echo "# Keep connections alive for only a few seconds
+KeepAlive On
+KeepAliveTimeout 3
+" >> /etc/apache2/conf.d/apache2-custom.conf
 #
 echo
 echo
@@ -584,6 +667,14 @@ echo "<IfModule mpm_worker_module>
     # Number of child server processes created on startup
     # Default 3
     StartServers            2
+
+    # Minimum number of idle child server processes
+    # Default 5
+    MinSpareServers         5
+
+    # Maximum number of idle child server processes
+    # Default 10
+    MaxSpareServers         10
 
     # Minimum number of idle threads to handle request spikes
     # Default 75
