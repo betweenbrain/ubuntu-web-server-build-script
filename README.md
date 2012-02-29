@@ -49,6 +49,11 @@ Here are a few ideas:
 *   Keep an eye on your logs and adjust mod_security / fail2ban accordingly
 *   Keep things up to date. For example `sudo aptitude safe-upgrade`
 *   Add a new database, with a corresponding user, with [add-db.sh](https://github.com/betweenbrain/ubuntu-web-server-build-script/blob/master/admin-scripts/add-db.sh)
+*   Add email aliases to postfix:
+  *  `sudo nano /etc/postfix/virtual`
+  *  Add: `alias email@foo.bar`
+  *  `sudo postmap /etc/postfix/virtual`
+
 
 Warranty, guarantees, culpability...etc.
 ----------------

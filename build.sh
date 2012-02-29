@@ -379,6 +379,16 @@ sed -i "s/myhostname =/#myhostname =/g" /etc/postfix/main.cf
 echo "myhostname = $HOSTNAME" >> /etc/postfix/main.cf
 sed -i "s/#myorigin = \/etc\/mailname/myorigin = $DOMAIN/g" /etc/postfix/main.cf
 #
+echo
+echo
+echo
+echo "Configure postfix to send email addressed to $USER@$HOSTNAME.$DOMAIN to $ADMINEMAIL."
+# http://www.postfix.org/STANDARD_CONFIGURATION_README.html#some_local
+echo "---------------------------------------------------------------"
+#
+echo "$USER@$HOSTNAME.$DOMAIN $ADMINEMAIL" > /etc/postfix/virtual
+postmap /etc/postfix/virtual
+#
 /etc/init.d/postfix restart
 #
 # ================================================================== #
