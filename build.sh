@@ -498,6 +498,25 @@ echo "/home/$USER/public_html/$DOMAIN/log/*.log {
 echo
 echo
 echo
+echo "Adding mod_security monitoring to fail2ban for $DOMAIN"
+# based on http://www.fail2ban.org/wiki/index.php/HOWTO_fail2ban_with_ModSecurity2.5
+echo "---------------------------------------------------------------"
+#
+echo "
+[modsecurity-$DOMAIN]
+
+enabled  = true
+filter   = modsecurity
+action   = iptables-multiport[name=ModSecurity-$DOMAIN, port="http,https"]
+           sendmail-buffered[name=ModSecurity, lines=10, dest=$ADMINEMAIL]
+logpath  = /home/$USER/public_html/$DOMAIN/log/*error.log
+bantime  = 600
+maxretry = 3
+" >> /etc/fail2ban/jail.local
+#
+echo
+echo
+echo
 echo "Enabling site $DOMAIN, restarting apache"
 echo "--------------------------------------------------------------"
 #
@@ -531,55 +550,55 @@ echo "Add mod_expires configuration"
 echo "---------------------------------------------------------------"
 #
 echo "<IfModule mod_expires.c>
-        # Enable expiration control
-        ExpiresActive On
+    # Enable expiration control
+    ExpiresActive On
 
-        # Default expiration: 1 hour after request
-        ExpiresDefault "now plus 1 hour"
+    # Default expiration: 1 hour after request
+    ExpiresDefault "now plus 1 hour"
 
-        # CSS and JS expiration: 1 week after request
-        ExpiresByType text/css "now plus 1 week"
-        ExpiresByType application/javascript "now plus 1 week"
-        ExpiresByType application/x-javascript "now plus 1 week"
+    # CSS and JS expiration: 1 week after request
+    ExpiresByType text/css "now plus 1 week"
+    ExpiresByType application/javascript "now plus 1 week"
+    ExpiresByType application/x-javascript "now plus 1 week"
 
-        # Image files expiration: 1 month after request
-        ExpiresByType image/bmp "now plus 1 month"
-        ExpiresByType image/gif "now plus 1 month"
-        ExpiresByType image/jpeg "now plus 1 month"
-        ExpiresByType image/jp2 "now plus 1 month"
-        ExpiresByType image/pipeg "now plus 1 month"
-        ExpiresByType image/png "now plus 1 month"
-        ExpiresByType image/svg+xml "now plus 1 month"
-        ExpiresByType image/tiff "now plus 1 month"
-        ExpiresByType image/vnd.microsoft.icon "now plus 1 month"
-        ExpiresByType image/x-icon "now plus 1 month"
-        ExpiresByType image/ico "now plus 1 month"
-        ExpiresByType image/icon "now plus 1 month"
-        ExpiresByType text/ico "now plus 1 month"
-        ExpiresByType application/ico "now plus 1 month"
-        ExpiresByType image/vnd.wap.wbmp "now plus 1 month"
-        ExpiresByType application/vnd.wap.wbxml "now plus 1 month"
-        ExpiresByType application/smil "now plus 1 month"
+    # Image files expiration: 1 month after request
+    ExpiresByType image/bmp "now plus 1 month"
+    ExpiresByType image/gif "now plus 1 month"
+    ExpiresByType image/jpeg "now plus 1 month"
+    ExpiresByType image/jp2 "now plus 1 month"
+    ExpiresByType image/pipeg "now plus 1 month"
+    ExpiresByType image/png "now plus 1 month"
+    ExpiresByType image/svg+xml "now plus 1 month"
+    ExpiresByType image/tiff "now plus 1 month"
+    ExpiresByType image/vnd.microsoft.icon "now plus 1 month"
+    ExpiresByType image/x-icon "now plus 1 month"
+    ExpiresByType image/ico "now plus 1 month"
+    ExpiresByType image/icon "now plus 1 month"
+    ExpiresByType text/ico "now plus 1 month"
+    ExpiresByType application/ico "now plus 1 month"
+    ExpiresByType image/vnd.wap.wbmp "now plus 1 month"
+    ExpiresByType application/vnd.wap.wbxml "now plus 1 month"
+    ExpiresByType application/smil "now plus 1 month"
 
-        # Audio files expiration: 1 month after request
-        ExpiresByType audio/basic "now plus 1 month"
-        ExpiresByType audio/mid "now plus 1 month"
-        ExpiresByType audio/midi "now plus 1 month"
-        ExpiresByType audio/mpeg "now plus 1 month"
-        ExpiresByType audio/x-aiff "now plus 1 month"
-        ExpiresByType audio/x-mpegurl "now plus 1 month"
-        ExpiresByType audio/x-pn-realaudio "now plus 1 month"
-        ExpiresByType audio/x-wav "now plus 1 month"
+    # Audio files expiration: 1 month after request
+    ExpiresByType audio/basic "now plus 1 month"
+    ExpiresByType audio/mid "now plus 1 month"
+    ExpiresByType audio/midi "now plus 1 month"
+    ExpiresByType audio/mpeg "now plus 1 month"
+    ExpiresByType audio/x-aiff "now plus 1 month"
+    ExpiresByType audio/x-mpegurl "now plus 1 month"
+    ExpiresByType audio/x-pn-realaudio "now plus 1 month"
+    ExpiresByType audio/x-wav "now plus 1 month"
 
-        # Movie files expiration: 1 month after request
-        ExpiresByType application/x-shockwave-flash "now plus 1 month"
-        ExpiresByType x-world/x-vrml "now plus 1 month"
-        ExpiresByType video/x-msvideo "now plus 1 month"
-        ExpiresByType video/mpeg "now plus 1 month"
-        ExpiresByType video/mp4 "now plus 1 month"
-        ExpiresByType video/quicktime "now plus 1 month"
-        ExpiresByType video/x-la-asf "now plus 1 month"
-        ExpiresByType video/x-ms-asf "now plus 1 month"
+    # Movie files expiration: 1 month after request
+    ExpiresByType application/x-shockwave-flash "now plus 1 month"
+    ExpiresByType x-world/x-vrml "now plus 1 month"
+    ExpiresByType video/x-msvideo "now plus 1 month"
+    ExpiresByType video/mpeg "now plus 1 month"
+    ExpiresByType video/mp4 "now plus 1 month"
+    ExpiresByType video/quicktime "now plus 1 month"
+    ExpiresByType video/x-la-asf "now plus 1 month"
+    ExpiresByType video/x-ms-asf "now plus 1 month"
 </IfModule>
 " >> /etc/apache2/conf.d/mod-expires.conf
 #
@@ -591,7 +610,31 @@ echo "Add mod_deflate configuration"
 echo "---------------------------------------------------------------"
 #
 echo "<IfModule mod_deflate.c>
-AddOutputFilterByType DEFLATE text/plain text/html text/xml text/css application/xml application/xhtm$
+    <Location />
+        # Insert filter
+        AddOutputFilterByType DEFLATE text/plain text/html text/xml text/css application/xml application/xhtml+xml application/rss+xml application/javascript application/x-javascript
+
+        # Netscape 4.x has some problems...
+        BrowserMatch ^Mozilla/4 gzip-only-text/html
+
+        # Netscape 4.06-4.08 have some more problems
+        BrowserMatch ^Mozilla/4\.0[678] no-gzip
+
+        # MSIE masquerades as Netscape, but it is fine
+        # BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
+
+        # NOTE: Due to a bug in mod_setenvif up to Apache 2.0.48
+        # the above regex won't work. You can use the following
+        # workaround to get the desired effect:
+        BrowserMatch \bMSI[E] !no-gzip !gzip-only-text/html
+
+        # Don't compress images
+        SetEnvIfNoCase Request_URI \
+        \.(?:gif|jpe?g|png)$ no-gzip dont-vary
+
+        # Make sure proxies don't deliver the wrong content
+        Header append Vary User-Agent env=!dont-vary
+    </Location>
 </IfModule>
 " >> /etc/apache2/conf.d/mod-deflate.conf
 #
@@ -632,7 +675,7 @@ echo "Install fcgid, PHP, and PHP modules"
 # https://help.ubuntu.com/community/ApacheMySQLPHP
 echo "--------------------------------------------------------------"
 #
-aptitude -y install libapache2-mod-fcgid php5-cgi php5-cli php5-mysql php5-curl php5-mcrypt php5-memcache php5-mhash php5-suhosin php5-xmlrpc php5-xsl
+aptitude -y install libapache2-mod-fcgid php5-cgi php5-cli php5-mysql php5-curl php5-gd php5-mcrypt php5-memcache php5-mhash php5-suhosin php5-xmlrpc php5-xsl
 #
 a2enmod fcgid
 #
@@ -844,6 +887,20 @@ mv /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf.example /etc/apac
 echo
 echo
 echo
+echo "Adding custom OWASP configuration"
+# http://serversitters.com/mod-security-whitelist-ip.html
+echo "---------------------------------------------------------------"
+#
+echo "# Whitelisting notify.paypal.com(IPN)
+SecRule REMOTE_ADDR \"@streq 216.113.188.202\" \"phase:1,allow,ctl:ruleEngine=off,msg:'Disabling rule-engine for IP %{REMOTE_ADDR}'\"
+SecRule REMOTE_ADDR \"@streq 216.113.188.203\" \"phase:1,allow,ctl:ruleEngine=off,msg:'Disabling rule-engine for IP %{REMOTE_ADDR}'\"
+SecRule REMOTE_ADDR \"@streq 216.113.188.204\" \"phase:1,allow,ctl:ruleEngine=off,msg:'Disabling rule-engine for IP %{REMOTE_ADDR}'\"
+SecRule REMOTE_ADDR \"@streq 66.211.170.66\" \"phase:1,allow,ctl:ruleEngine=off,msg:'Disabling rule-engine for IP %{REMOTE_ADDR}'\"
+" > /etc/apache2/modsecurity-crs/modsecurity_crs_15_custom.conf
+#
+echo
+echo
+echo
 echo "Activating additonal select rulesets"
 echo "---------------------------------------------------------------"
 #
@@ -887,6 +944,7 @@ echo "---------------------------------------------------------------"
 #
 echo "<IfModule security2_module>
     Include modsecurity-crs/modsecurity_crs_10_config.conf
+    Include modsecurity-crs/modsecurity_crs_15_custom.conf
     Include modsecurity-crs/base_rules/*.conf
     Include modsecurity-crs/activated_rules/*.conf
 </IfModule>
