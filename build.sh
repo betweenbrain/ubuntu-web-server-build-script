@@ -486,12 +486,12 @@ echo "Adding logrotate conf for $DOMAIN"
 echo "--------------------------------------------------------------"
 #
 echo "/home/$USER/public_html/$DOMAIN/log/*.log {
-        weekly
-        missingok
-        rotate 52
-        compress
-        delaycompress
-        notifempty
+    weekly
+    missingok
+    rotate 52
+    compress
+    delaycompress
+    notifempty
 }
 " > /etc/logrotate.d/$DOMAIN
 #
@@ -508,7 +508,7 @@ echo "
 enabled  = true
 filter   = modsecurity
 action   = iptables-multiport[name=ModSecurity-$DOMAIN, port="http,https"]
-           sendmail-buffered[name=ModSecurity, lines=10, dest=$ADMINEMAIL]
+           sendmail-buffered[name=ModSecurity, lines=10, dest=webmaster@$DOMAIN]
 logpath  = /home/$USER/public_html/$DOMAIN/log/*error.log
 bantime  = 600
 maxretry = 3
@@ -545,7 +545,7 @@ a2dismod status cgid
 echo
 echo
 echo
-echo "Add mod_expires configuration"
+echo "Add mod_expires configuration. WARNING: May cause issues with pages that change content dynamically."
 # https://akeeba.assembla.com/code/master-htaccess/git/nodes/htaccess.txt
 echo "---------------------------------------------------------------"
 #

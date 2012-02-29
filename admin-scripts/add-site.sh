@@ -2,7 +2,7 @@
 # ================================================================== #
 # Shell script to add a new site (virtual host)
 # ================================================================== #
-# Copyright (c) 2012 Matt Thomas http://betweenbrain.com
+# Parts copyright (c) 2012 Matt Thomas http://betweenbrain.com
 # This script is licensed under GNU GPL version 2.0 or above
 # ================================================================== #
 #
@@ -62,14 +62,49 @@ mkdir /var/www/php-fcgi-scripts/$DOMAIN/
 echo "#!/bin/sh
 PHPRC=/etc/php5/cgi/
 export PHPRC
-export PHP_FCGI_MAX_REQUESTS=1000
-export PHP_FCGI_CHILDREN=10
+export PHP_FCGI_MAX_REQUESTS=5000
+export PHP_FCGI_CHILDREN=1
 exec /usr/lib/cgi-bin/php
 " > /var/www/php-fcgi-scripts/$DOMAIN/php-fcgi-starter
 #
 chmod 755 /var/www/php-fcgi-scripts/$DOMAIN/php-fcgi-starter
 #
 chown -R $USER:$USER /var/www/php-fcgi-scripts/$DOMAIN
+#
+echo
+echo
+echo
+echo "Adding logrotate conf for $DOMAIN"
+echo "--------------------------------------------------------------"
+#
+echo "/home/$USER/public_html/$DOMAIN/log/*.log {
+    weekly
+    missingok
+    rotate 52
+    compress
+    delaycompress
+    notifempty
+}
+" > /etc/logrotate.d/$DOMAIN
+#
+echo
+echo
+echo
+echo "Adding mod_security monitoring to fail2ban for $DOMAIN"
+# based on http://www.fail2ban.org/wiki/index.php/HOWTO_fail2ban_with_ModSecurity2.5
+echo "---------------------------------------------------------------"
+#
+echo "
+[modsecurity-$DOMAIN]
+
+enabled  = true
+filter   = modsecurity
+action   = iptables-multiport[name=ModSecurity-$DOMAIN, port="http,https"]
+           sendmail-buffered[name=ModSecurity, lines=10, dest=webmaster@$DOMAIN]
+logpath  = /home/$USER/public_html/$DOMAIN/log/*error.log
+bantime  = 600
+maxretry = 3
+" >> /etc/fail2ban/jail.local
 #
 echo
 echo
