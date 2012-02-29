@@ -482,6 +482,22 @@ chown -R $USER:$USER /var/www/php-fcgi-scripts/$DOMAIN
 echo
 echo
 echo
+echo "Adding logrotate conf for $DOMAIN"
+echo "--------------------------------------------------------------"
+#
+echo "/home/$USER/public_html/$DOMAIN/log/*.log {
+        weekly
+        missingok
+        rotate 52
+        compress
+        delaycompress
+        notifempty
+}
+" > /etc/logrotate.d/$DOMAIN
+#
+echo
+echo
+echo
 echo "Enabling site $DOMAIN, restarting apache"
 echo "--------------------------------------------------------------"
 #
