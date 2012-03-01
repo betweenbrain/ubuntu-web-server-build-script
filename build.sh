@@ -329,7 +329,7 @@ chmod +x /etc/network/if-pre-up.d/iptablesload
 echo
 echo
 echo
-echo "Establish IPTables logging"
+echo "Establish IPTables logging, and rotation of logs"
 # http://ubuntuforums.org/showthread.php?t=668148
 # https://wiki.ubuntu.com/LucidLynx/ReleaseNotes#line-178
 echo "---------------------------------------------------------------"
@@ -339,6 +339,19 @@ kern.debug;kern.info /var/log/firewall.log
 " > /etc/rsyslog.d/firewall.conf
 #
 /etc/init.d/rsyslog restart
+#
+mkdir /var/log/old/
+#
+echo "/var/log/firewall.log {
+    weekly
+    missingok
+    rotate 13
+    compress
+    notifempty
+    create 655 syslog adm
+    olddir /var/log/old/
+}
+" > /etc/logrotate.d/firewall
 #
 echo
 echo
