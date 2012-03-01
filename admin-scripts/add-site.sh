@@ -10,6 +10,31 @@ read -p "Enter new site domain: " DOMAIN
 echo
 read -p "Enter user under which new site will run under: " USER
 echo
+echo
+echo
+echo "Creating directories for $DOMAIN in $USER's home directory"
+echo "--------------------------------------------------------------"
+#
+mkdir -p /home/$USER/public_html/$DOMAIN/{cgi-bin,log,log/old,www}
+echo "<?php echo '<h1>$DOMAIN works!</h1>'; ?>" > /home/$USER/public_html/$DOMAIN/www/index.php
+#
+echo
+echo
+echo
+echo "Setting correct ownership and permissions for $DOMAIN"
+echo "--------------------------------------------------------------"
+#
+chown -R $USER:$USER /home/$USER/public_html
+find /home/$USER/public_html/$DOMAIN/ -type d -exec chmod 755 {} \;
+find /home/$USER/public_html/$DOMAIN/ -type f -exec chmod 644 {} \;
+#
+echo
+echo
+echo
+echo "Creating VirtualHost for $DOMAIN"
+# http://www.howtoforge.com/how-to-set-up-apache2-with-mod_fcgid-and-php5-on-ubuntu-8.10
+echo "--------------------------------------------------------------"
+#
 echo "<VirtualHost *:80>
     DocumentRoot /home/$USER/public_html/$DOMAIN/www
 
@@ -40,23 +65,10 @@ echo "<VirtualHost *:80>
 echo
 echo
 echo
-echo "Creating website directory structure for $DOMAIN"
-echo "--------------------------------------------------------------"
-#
-mkdir -p /home/$USER/public_html/$DOMAIN/{cgi-bin,log,www}
-echo "<?php echo '<h1>$DOMAIN works!</h1>'; ?>" > /home/$USER/public_html/$DOMAIN/www/index.php
-chown -R $USER:$USER /home/$USER/public_html
-#
-# Setting correct permissions
-find /home/$USER/public_html/$DOMAIN/ -type d -exec chmod 755 {} \;
-find /home/$USER/public_html/$DOMAIN/ -type f -exec chmod 644 {} \;
-#
-echo
-echo
-echo
 echo "Creating fcgi wrapper for $DOMAIN, making it executable and setting owner"
 echo "--------------------------------------------------------------"
 #
+mkdir /var/www/php-fcgi-scripts/
 mkdir /var/www/php-fcgi-scripts/$DOMAIN/
 #
 echo "#!/bin/sh
@@ -82,8 +94,9 @@ echo "/home/$USER/public_html/$DOMAIN/log/*.log {
     missingok
     rotate 52
     compress
-    delaycompress
     notifempty
+    create 655 $USER $USER
+    olddir /home/$USER/public_html/$DOMAIN/log/old/
 }
 " > /etc/logrotate.d/$DOMAIN
 #
@@ -109,7 +122,7 @@ maxretry = 3
 echo
 echo
 echo
-echo "Enabling site $DOMAIN, reloading apache"
+echo "Enabling site $DOMAIN, restarting apache"
 echo "--------------------------------------------------------------"
 #
 a2ensite $DOMAIN

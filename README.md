@@ -53,6 +53,7 @@ Here are a few ideas:
   *  `sudo nano /etc/postfix/virtual`
   *  Add: `alias email@foo.bar`
   *  `sudo postmap /etc/postfix/virtual`
+*  Make sure that you own your bash history file `sudo chown you:you ~/.bash_history`
 
 
 Warranty, guarantees, culpability...etc.

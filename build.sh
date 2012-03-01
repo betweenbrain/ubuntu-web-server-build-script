@@ -421,7 +421,7 @@ echo
 echo "Creating directories for $DOMAIN in $USER's home directory"
 echo "--------------------------------------------------------------"
 #
-mkdir -p /home/$USER/public_html/$DOMAIN/{cgi-bin,log,www}
+mkdir -p /home/$USER/public_html/$DOMAIN/{cgi-bin,log,log/old,www}
 echo "<?php echo '<h1>$DOMAIN works!</h1>'; ?>" > /home/$USER/public_html/$DOMAIN/www/index.php
 #
 echo
@@ -500,8 +500,9 @@ echo "/home/$USER/public_html/$DOMAIN/log/*.log {
     missingok
     rotate 52
     compress
-    delaycompress
     notifempty
+    create 655 $USER $USER
+    olddir /home/$USER/public_html/$DOMAIN/log/old/
 }
 " > /etc/logrotate.d/$DOMAIN
 #
@@ -898,7 +899,8 @@ echo
 echo
 echo
 echo "Adding custom OWASP configuration"
-# http://serversitters.com/mod-security-whitelist-ip.html
+# http://permalink.gmane.org/gmane.comp.apache.mod-security.user/8735
+# https://ppmts.custhelp.com/app/answers/detail/a_id/92
 echo "---------------------------------------------------------------"
 #
 echo "# Whitelisting notify.paypal.com(IPN)
