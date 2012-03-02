@@ -917,10 +917,10 @@ echo "Adding custom OWASP configuration"
 echo "---------------------------------------------------------------"
 #
 echo "# Whitelisting notify.paypal.com(IPN)
-SecRule REMOTE_ADDR \"@streq 216.113.188.202\" \"phase:1,allow,ctl:ruleEngine=off,msg:'Disabling rule-engine for IP %{REMOTE_ADDR}'\"
-SecRule REMOTE_ADDR \"@streq 216.113.188.203\" \"phase:1,allow,ctl:ruleEngine=off,msg:'Disabling rule-engine for IP %{REMOTE_ADDR}'\"
-SecRule REMOTE_ADDR \"@streq 216.113.188.204\" \"phase:1,allow,ctl:ruleEngine=off,msg:'Disabling rule-engine for IP %{REMOTE_ADDR}'\"
-SecRule REMOTE_ADDR \"@streq 66.211.170.66\" \"phase:1,allow,ctl:ruleEngine=off,msg:'Disabling rule-engine for IP %{REMOTE_ADDR}'\"
+SecRule REMOTE_ADDR \"@streq 216.113.188.202\" \"phase:1,ctl:ruleEngine=off,msg:'Disabling rule-engine for IP %{REMOTE_ADDR}'\"
+SecRule REMOTE_ADDR \"@streq 216.113.188.203\" \"phase:1,ctl:ruleEngine=off,msg:'Disabling rule-engine for IP %{REMOTE_ADDR}'\"
+SecRule REMOTE_ADDR \"@streq 216.113.188.204\" \"phase:1,ctl:ruleEngine=off,msg:'Disabling rule-engine for IP %{REMOTE_ADDR}'\"
+SecRule REMOTE_ADDR \"@streq 66.211.170.66\" \"phase:1,ctl:ruleEngine=off,msg:'Disabling rule-engine for IP %{REMOTE_ADDR}'\"
 " > /etc/apache2/modsecurity-crs/modsecurity_crs_15_custom.conf
 #
 echo
