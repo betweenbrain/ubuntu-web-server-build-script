@@ -513,6 +513,7 @@ echo "/home/$USER/public_html/$DOMAIN/log/*.log {
     missingok
     rotate 52
     compress
+    delaycompress
     notifempty
     create 655 $USER $USER
     olddir /home/$USER/public_html/$DOMAIN/log/old/
