@@ -1,7 +1,7 @@
 Initial server setup
 ====================
 
-A hand-rolled bash shell script to help you get up and running quickly with an Ubuntu 10.04 web server.
+A hand-rolled bash shell script to help you get up and running quickly with an Ubuntu 10.04 web server  (Apache2 MPM Worker, MySQL, PHP5, suexec, fcgid).
 
 Please note: This is not intended to be a complete and comprehensive solution, but a starting point for your custom server. Tweak, modify and adjust as needed and desired.
 
