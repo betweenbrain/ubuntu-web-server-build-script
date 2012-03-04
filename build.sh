@@ -1,6 +1,6 @@
 #!/bin/bash
 # ================================================================== #
-# Ubuntu 10.04 web server build shell script
+# Ubuntu 10.04 web server build shell script (suPHP)
 # ================================================================== #
 # Parts copyright (c) 2012 Matt Thomas http://betweenbrain.com
 # This script is licensed under GNU GPL version 2.0 or above
@@ -21,7 +21,7 @@ SSHPORT=
 IGNOREIP=
 USER=
 ADMINEMAIL=
-PUBLICKEY="ssh-rsa ... foo@bar.com"
+PUBLICKEY="ssh-rsa ... ... .. foo@bar.com"
 # ================================================================== #
 #                      End system specific details                   #
 # ================================================================== #
@@ -411,10 +411,10 @@ postmap /etc/postfix/virtual
 echo
 echo
 echo
-echo "Installing Apache threaded server (MPM Worker)"
+echo "Installing Apache"
 echo "---------------------------------------------------------------"
 #
-aptitude -y install apache2-mpm-worker apache2-suexec
+aptitude -y install apache2
 echo "ServerName $HOSTNAME" > /etc/apache2/conf.d/servername.conf
 sed -i "s/Timeout 300/Timeout 30/g" /etc/apache2/apache2.conf
 #
@@ -466,41 +466,27 @@ echo "<VirtualHost *:80>
     ErrorLog  /home/$USER/public_html/$DOMAIN/log/error.log
     CustomLog /home/$USER/public_html/$DOMAIN/log/access.log combined
 
-    <IfModule mod_fcgid.c>
-        SuexecUserGroup $USER $USER
-        <Directory /home/$USER/public_html/$DOMAIN/www>
-            Options FollowSymLinks +ExecCGI
-            AddHandler fcgid-script .php
-            FCGIWrapper /var/www/php-fcgi-scripts/$DOMAIN/php-fcgi-starter .php
-            AllowOverride All
-            Order allow,deny
-            Allow from all
-            DirectoryIndex index.php index.html
-        </Directory>
-    </IfModule>
+    <Directory /home/$USER/public_html/$DOMAIN/www>
+        Options FollowSymLinks
+        AllowOverride All
+        Order allow,deny
+        Allow from all
+        DirectoryIndex index.php index.html
+    </Directory>
 </VirtualHost>
 " > /etc/apache2/sites-available/$DOMAIN
 #
-echo
-echo
-echo
-echo "Creating fcgi wrapper for $DOMAIN, making it executable and setting owner"
-echo "--------------------------------------------------------------"
-#
-mkdir /var/www/php-fcgi-scripts/
-mkdir /var/www/php-fcgi-scripts/$DOMAIN/
-#
-echo "#!/bin/sh
-PHPRC=/etc/php5/cgi/
-export PHPRC
-export PHP_FCGI_MAX_REQUESTS=5000
-export PHP_FCGI_CHILDREN=1
-exec /usr/lib/cgi-bin/php
-" > /var/www/php-fcgi-scripts/$DOMAIN/php-fcgi-starter
-#
-chmod 755 /var/www/php-fcgi-scripts/$DOMAIN/php-fcgi-starter
-#
-chown -R $USER:$USER /var/www/php-fcgi-scripts/$DOMAIN
+echo "
+# suPHP_ConfigPath directives - see http://php.net/ini.core
+post_max_size = 20M
+upload_max_filesize = 20M
+max_execution_time = 90
+max_input_time = 90
+memory_limit = 48M
+output_buffering = off
+display_errors = off
+magic_quotes_gpc = off
+" >> /home/$USER/public_html/$DOMAIN/php.ini
 #
 echo
 echo
@@ -556,16 +542,6 @@ echo "---------------------------------------------------------------"
 echo
 #
 a2enmod rewrite headers expires deflate ssl suexec
-#
-echo
-echo
-echo
-echo "Disable Apache modules"
-echo "---------------------------------------------------------------"
-echo
-#
-a2dismod status cgid
-#
 #
 echo
 echo
@@ -700,102 +676,13 @@ echo "Install fcgid, PHP, and PHP modules"
 # https://help.ubuntu.com/community/ApacheMySQLPHP
 echo "--------------------------------------------------------------"
 #
-aptitude -y install libapache2-mod-fcgid php5-cgi php5-cli php5-mysql php5-curl php5-gd php5-mcrypt php5-memcache php5-mhash php5-suhosin php5-xmlrpc php5-xsl
+aptitude -y install libapache2-mod-suphp libapache2-mod-php5 php5-cgi php5-cli php5-mysql php5-curl php5-gd php5-mcrypt php5-memcache php5-mhash php5-suhosin php5-xmlrpc php5-xsl
 #
-a2enmod fcgid
+a2dismod php5
+#
+a2enmod suphp
 #
 /etc/init.d/apache2 restart
-#
-echo
-echo
-echo
-echo "Configuring fcgid"
-echo "--------------------------------------------------------------"
-#
-echo "<IfModule mod_fcgid.c>
-  AddHandler fcgid-script .fcgi .php
-
-  # Where to look for the php.ini file?
-  DefaultInitEnv PHPRC        "/etc/php5/cgi"
-
-  # Maximum number of PHP processes
-  # Default 1000
-  FcgidMaxProcesses         10
-
-  # Number of seconds of idle time before a process is terminated
-  # Default 40
-  FcgidIOTimeout            30
-  # Default 300
-  FcgidIdleTimeout          120
-
-  #Or use this if you use the file above
-  FCGIWrapper /usr/bin/php-cgi .php
-</IfModule>
-" > /etc/apache2/conf.d/php-fcgid.conf
-#
-echo
-echo
-echo
-echo "Configuring apach mpm worker module"
-echo "--------------------------------------------------------------"
-#
-echo "<IfModule mpm_worker_module>
-    # Combined with ThreadLimit to set maximum configured value for MaxClients
-    # Default 16
-    # ServerLimit           16
-
-    # Sets the maximum configured value for ThreadsPerChild
-    # Default 64
-    # ThreadLimit           64
-
-    # Number of child server processes created on startup
-    # Default 3
-    StartServers            2
-
-    # Minimum number of idle child server processes
-    # Default 5
-    MinSpareServers         5
-
-    # Maximum number of idle child server processes
-    # Default 10
-    MaxSpareServers         10
-
-    # Minimum number of idle threads to handle request spikes
-    # Default 75
-    MinSpareThreads         5
-
-    # Minimum number of idle threads to handle request spikes
-    # Default 250
-    MaxSpareThreads         10
-
-    # Number of threads created by each child process
-    # Default 25
-    ThreadsPerChild         10
-
-    # Number of simultaneous requests that will be served, integer multiple of ThreadsPerChild
-    # Default 16
-    # Linode 512: MaxClients 25 or less
-    # Linode 1024: MaxClients 50 or less
-    # Linode 1536: MaxClients 75 or less
-    # Linode 2048: MaxClients 100 or less
-    MaxClients              20
-
-    # Number of requests that an individual child server process will handle
-    # Default 1000
-    # 0 = process will never expire
-    MaxRequestsPerChild     100
-</IfModule>
-"  > /etc/apache2/conf.d/mpm-worker.conf
-#
-echo
-echo
-echo
-echo "Tweaking PHP settings"
-echo "--------------------------------------------------------------"
-#
-sed -i "s/memory_limit = 128M/memory_limit = 48M/g" /etc/php5/cgi/php.ini
-sed -i "s/upload_max_filesize = 2M/upload_max_filesize = 20M/g" /etc/php5/cgi/php.ini
-sed -i "s/output_buffering = 4096/output_buffering = off/g" /etc/php5/cgi/php.ini
 #
 # ================================================================== #
 #                           Server Security                          #

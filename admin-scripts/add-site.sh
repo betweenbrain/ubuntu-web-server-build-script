@@ -47,41 +47,27 @@ echo "<VirtualHost *:80>
     ErrorLog  /home/$USER/public_html/$DOMAIN/log/error.log
     CustomLog /home/$USER/public_html/$DOMAIN/log/access.log combined
 
-    <IfModule mod_fcgid.c>
-        SuexecUserGroup $USER $USER
-        <Directory /home/$USER/public_html/$DOMAIN/www>
-            Options FollowSymLinks +ExecCGI
-            AddHandler fcgid-script .php
-            FCGIWrapper /var/www/php-fcgi-scripts/$DOMAIN/php-fcgi-starter .php
-            AllowOverride All
-            Order allow,deny
-            Allow from all
-            DirectoryIndex index.php index.html
-        </Directory>
-    </IfModule>
+    <Directory /home/$USER/public_html/$DOMAIN/www>
+        Options FollowSymLinks
+        AllowOverride All
+        Order allow,deny
+        Allow from all
+        DirectoryIndex index.php index.html
+    </Directory>
 </VirtualHost>
 " > /etc/apache2/sites-available/$DOMAIN
 #
-echo
-echo
-echo
-echo "Creating fcgi wrapper for $DOMAIN, making it executable and setting owner"
-echo "--------------------------------------------------------------"
-#
-mkdir /var/www/php-fcgi-scripts/
-mkdir /var/www/php-fcgi-scripts/$DOMAIN/
-#
-echo "#!/bin/sh
-PHPRC=/etc/php5/cgi/
-export PHPRC
-export PHP_FCGI_MAX_REQUESTS=5000
-export PHP_FCGI_CHILDREN=1
-exec /usr/lib/cgi-bin/php
-" > /var/www/php-fcgi-scripts/$DOMAIN/php-fcgi-starter
-#
-chmod 755 /var/www/php-fcgi-scripts/$DOMAIN/php-fcgi-starter
-#
-chown -R $USER:$USER /var/www/php-fcgi-scripts/$DOMAIN
+echo "
+# suPHP_ConfigPath directives - see http://php.net/ini.core
+post_max_size = 20M
+upload_max_filesize = 20M
+max_execution_time = 90
+max_input_time = 90
+memory_limit = 48M
+output_buffering = off
+display_errors = off
+magic_quotes_gpc = off
+" >> /home/$USER/public_html/$DOMAIN/php.ini
 #
 echo
 echo
