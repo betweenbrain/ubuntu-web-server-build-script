@@ -672,7 +672,7 @@ aptitude -y install libapache2-mod-auth-mysql
 echo
 echo
 echo
-echo "Install fcgid, PHP, and PHP modules"
+echo "Install PHP, suPHP, and PHP modules"
 # https://help.ubuntu.com/community/ApacheMySQLPHP
 echo "--------------------------------------------------------------"
 #
