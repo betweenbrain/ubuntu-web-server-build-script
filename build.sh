@@ -945,6 +945,11 @@ echo "Enabling security rules engine with default setting of DetectionOnly. Poss
 echo "---------------------------------------------------------------"
 #
 sed -i "s/#SecRuleEngine DetectionOnly/SecRuleEngine DetectionOnly/g" /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf
+
+
+
+
+
 #
 echo
 echo
