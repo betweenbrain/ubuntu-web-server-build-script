@@ -347,8 +347,9 @@ echo "/var/log/firewall.log {
     missingok
     rotate 13
     compress
+    delaycompress
     notifempty
-    create 655 syslog adm
+    create 640 syslog adm
     olddir /var/log/old/
 }
 " > /etc/logrotate.d/firewall
@@ -515,7 +516,7 @@ echo "/home/$USER/public_html/$DOMAIN/log/*.log {
     compress
     delaycompress
     notifempty
-    create 655 $USER $USER
+    create 640 $USER $USER
     olddir /home/$USER/public_html/$DOMAIN/log/old/
 }
 " > /etc/logrotate.d/$DOMAIN
@@ -967,6 +968,50 @@ SecDataDir /var/log/mod_security
 # SecDebugLogLevel 3
 " >> /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf
 #
+echo
+echo
+echo
+echo "Establishing log rotation for mod_security"
+echo "---------------------------------------------------------------"
+#
+mkdir /var/log/mod_security/old/
+#
+echo "/var/log/mod_security/*.log {
+    weekly
+    missingok
+    rotate 13
+    compress
+    delaycompress
+    notifempty
+    create 640 www-data www-data
+    olddir /var/log/mod_security/old/
+}
+
+/var/log/mod_security/*.dir {
+    weekly
+    missingok
+    rotate 13
+    compress
+    delaycompress
+    notifempty
+    create 640 www-data www-data
+    olddir /var/log/mod_security/old/
+}
+
+/var/log/mod_security/*.pag {
+    weekly
+    missingok
+    rotate 13
+    compress
+    delaycompress
+    notifempty
+    create 640 www-data www-data
+    olddir /var/log/mod_security/old/
+}
+" > /etc/logrotate.d/mod_security
+#
+
+
 echo
 echo
 echo
