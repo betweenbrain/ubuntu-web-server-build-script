@@ -480,6 +480,42 @@ echo "<VirtualHost *:80>
         </Directory>
     </IfModule>
 </VirtualHost>
+
+<IfModule mod_ssl.c>
+    <VirtualHost *:443>
+        DocumentRoot /home/$USER/public_html/$DOMAIN/www
+
+        ServerName  $DOMAIN
+        ServerAlias www.$DOMAIN
+        ServerAdmin webmaster@$DOMAIN
+        ServerSignature Off
+
+        LogLevel warn
+        ErrorLog  /home/$USER/public_html/$DOMAIN/log/ssl_error.log
+        CustomLog /home/$USER/public_html/$DOMAIN/log/ssl_access.log combined
+
+        # See /etc/apache2/sites-available/default-ssl
+
+	    SSLEngine on
+
+	    SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
+	    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+	    <FilesMatch "\.(cgi|shtml|phtml|php)$">
+		    SSLOptions +StdEnvVars
+	    </FilesMatch>
+	    <Directory /usr/lib/cgi-bin>
+		    SSLOptions +StdEnvVars
+	    </Directory>
+
+	    BrowserMatch "MSIE [2-6]" \
+		    nokeepalive ssl-unclean-shutdown \
+		    downgrade-1.0 force-response-1.0
+	    # MSIE 7 and newer should be able to use keepalive
+	    BrowserMatch "MSIE [17-9]" ssl-unclean-shutdown
+
+    </VirtualHost>
+</IfModule>
 " > /etc/apache2/sites-available/$DOMAIN
 #
 echo
@@ -801,6 +837,31 @@ sed -i "s/output_buffering = 4096/output_buffering = off/g" /etc/php5/cgi/php.in
 # ================================================================== #
 #                           Server Security                          #
 # ================================================================== #
+#
+echo
+echo
+echo
+echo "Installing and configuring logwatch for log monitoring"
+# https://help.ubuntu.com/community/Logwatch
+echo "--------------------------------------------------------------"
+#
+aptitude -y install logwatch
+mkdir /var/cache/logwatch
+cp /usr/share/logwatch/default.conf/logwatch.conf /etc/logwatch/conf/
+#
+sed -i "s/MailTo = root/MailTo = $ADMINEMAIL/g" /etc/logwatch/conf/logwatch.conf
+sed -i "s/Detail = Low/Detail = High/g" /etc/logwatch/conf/logwatch.conf
+sed -i "s/Format = text/Format = html/g" /etc/logwatch/conf/logwatch.conf
+#
+cp /usr/share/logwatch/default.conf/logfiles/http.conf to /etc/logwatch/conf/logfiles
+#
+echo "
+# Log files for $DOMAIN
+LogFile = /home/$USER/public_html/$DOMAIN/log/access.log
+LogFile = /home/$USER/public_html/$DOMAIN/log/error.log
+LogFile = /home/$USER/public_html/$DOMAIN/log/ssl_error.log
+LogFile = /home/$USER/public_html/$DOMAIN/log/ssl_access.log
+" >> /etc/logwatch/conf/logfiles/http.conf
 #
 echo
 echo
