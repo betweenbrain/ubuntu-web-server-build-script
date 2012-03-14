@@ -841,6 +841,33 @@ sed -i "s/output_buffering = 4096/output_buffering = off/g" /etc/php5/cgi/php.in
 echo
 echo
 echo
+echo "Linux kernel hardening"
+# http://www.cyberciti.biz/faq/linux-kernel-etcsysctl-conf-security-hardening/
+echo "--------------------------------------------------------------"
+#
+cp /etc/sysctl.conf.bak
+#
+sed -i "s/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=0/g" /etc/sysctl.conf
+sed -i "s/#net.ipv6.conf.all.forwarding=1/net.ipv6.conf.all.forwarding=0/g" /etc/sysctl.conf
+sed -i "s/#net.ipv4.icmp_echo_ignore_broadcasts = 1/net.ipv4.icmp_echo_ignore_broadcasts = 1/g" /etc/sysctl.conf
+sed -i "s/#net.ipv4.icmp_ignore_bogus_error_responses = 1/net.ipv4.icmp_ignore_bogus_error_responses = 1/g" /etc/sysctl.conf
+sed -i "s/#net.ipv4.conf.all.accept_redirects = 0/net.ipv4.conf.all.accept_redirects = 0/g" /etc/sysctl.conf
+sed -i "s/#net.ipv6.conf.all.accept_redirects = 0/net.ipv6.conf.all.accept_redirects = 0/g" /etc/sysctl.conf
+sed -i "s/#net.ipv4.conf.all.send_redirects = 0/net.ipv4.conf.all.send_redirects = 0/g" /etc/sysctl.conf
+sed -i "s/#net.ipv4.conf.all.accept_source_route = 0/net.ipv4.conf.all.accept_source_route = 0/g" /etc/sysctl.conf
+sed -i "s/#net.ipv6.conf.all.accept_source_route = 0/net.ipv6.conf.all.accept_source_route = 0/g" /etc/sysctl.conf
+sed -i "s/#net.ipv4.conf.all.log_martians = 1/net.ipv4.conf.all.log_martians = 1/g" /etc/sysctl.conf
+#
+echo "#
+# Controls the use of TCP syncookies
+net.ipv4.tcp_synack_retries = 2
+" >> /etc/sysctl.conf
+#
+sysctl -p
+#
+echo
+echo
+echo
 echo "Installing and configuring logwatch for log monitoring"
 # https://help.ubuntu.com/community/Logwatch
 echo "--------------------------------------------------------------"
@@ -1007,11 +1034,6 @@ echo "Enabling security rules engine with default setting of DetectionOnly. Poss
 echo "---------------------------------------------------------------"
 #
 sed -i "s/#SecRuleEngine DetectionOnly/SecRuleEngine DetectionOnly/g" /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf
-
-
-
-
-
 #
 echo
 echo
@@ -1111,6 +1133,16 @@ echo "Fixing backward compatability issue in ModSecurity CRS v2.2.3. REQBODY_ERR
 echo "---------------------------------------------------------------"
 #
 sed -i "s/REQBODY_ERROR/REQBODY_PROCESSOR_ERROR/g" /etc/apache2/modsecurity-crs/base_rules/modsecurity_crs_20_protocol_violations.conf
+#
+echo
+echo
+echo
+echo "Modifying rules to reduce false positives"
+echo "---------------------------------------------------------------"
+#
+sed -i "s/|between|/|/g" /etc/apache2/modsecurity-crs/base_rules/modsecurity_crs_41_sql_injection_attacks.conf
+sed -i "s/|div|/|/g" /etc/apache2/modsecurity-crs/base_rules/modsecurity_crs_41_sql_injection_attacks.conf
+sed -i "s/|like|/|/g" /etc/apache2/modsecurity-crs/base_rules/modsecurity_crs_41_sql_injection_attacks.conf
 #
 echo
 echo
