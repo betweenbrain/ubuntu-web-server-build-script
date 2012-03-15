@@ -746,6 +746,15 @@ a2enmod fcgid
 echo
 echo
 echo
+echo "Fixing PHP Deprecated notice in /etc/php5/cli/conf.d/mcrypt.ini"
+# http://www.asim.pk/2010/06/21/php-depreciated-errors-on-ubuntu-10-04-lts/
+echo "--------------------------------------------------------------"
+#
+sed -i "s/# configuration for php MCrypt module/; configuration for php MCrypt module/g" /etc/php5/cli/conf.d/mcrypt.ini
+#
+echo
+echo
+echo
 echo "Configuring fcgid"
 echo "--------------------------------------------------------------"
 #
