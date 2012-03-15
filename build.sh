@@ -501,7 +501,7 @@ echo "<VirtualHost *:80>
 	    SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
 	    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
 
-	    <FilesMatch \".(cgi|shtml|phtml|php)$\">
+	    <FilesMatch \"\\.(cgi|shtml|phtml|php)$\">
 		    SSLOptions +StdEnvVars
 	    </FilesMatch>
 	    <Directory /usr/lib/cgi-bin>
