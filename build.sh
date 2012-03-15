@@ -831,7 +831,7 @@ echo "Linux kernel hardening"
 # http://www.cyberciti.biz/faq/linux-kernel-etcsysctl-conf-security-hardening/
 echo "--------------------------------------------------------------"
 #
-cp /etc/sysctl.conf.bak
+cp /etc/sysctl.conf /etc/sysctl.conf.bak
 #
 sed -i "s/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=0/g" /etc/sysctl.conf
 sed -i "s/#net.ipv6.conf.all.forwarding=1/net.ipv6.conf.all.forwarding=0/g" /etc/sysctl.conf
