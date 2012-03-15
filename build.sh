@@ -816,7 +816,7 @@ echo "--------------------------------------------------------------"
 sed -i "s/memory_limit = 128M/memory_limit = 48M/g" /etc/php5/cgi/php.ini
 sed -i "s/upload_max_filesize = 2M/upload_max_filesize = 20M/g" /etc/php5/cgi/php.ini
 sed -i "s/output_buffering = 4096/output_buffering = Off/g" /etc/php5/cgi/php.ini
-sed -i "s/allow_url_fopen = On/allow_url_fopen = Off/g" /etc/php5/cgi/php.ini
+# sed -i "s/allow_url_fopen = On/allow_url_fopen = Off/g" /etc/php5/cgi/php.ini
 sed -i "s/expose_php = On/expose_php = Off/g" /etc/php5/cgi/php.ini
 sed -i "s/disable_functions =/disable_functions = show_source, system, shell_exec, passthru, exec, phpinfo, popen, proc_open/g" /etc/php5/cgi/php.ini
 #
