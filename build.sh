@@ -837,11 +837,15 @@ echo
 echo
 echo
 echo "Tweaking PHP settings"
+# http://docs.joomla.org/Security_Checklist_2_-_Hosting_and_Server_Setup#Use_PHP_disable_functions
 echo "--------------------------------------------------------------"
 #
 sed -i "s/memory_limit = 128M/memory_limit = 48M/g" /etc/php5/cgi/php.ini
 sed -i "s/upload_max_filesize = 2M/upload_max_filesize = 20M/g" /etc/php5/cgi/php.ini
-sed -i "s/output_buffering = 4096/output_buffering = off/g" /etc/php5/cgi/php.ini
+sed -i "s/output_buffering = 4096/output_buffering = Off/g" /etc/php5/cgi/php.ini
+sed -i "s/allow_url_fopen = On/allow_url_fopen = Off/g" /etc/php5/cgi/php.ini
+sed -i "s/expose_php = On/expose_php = Off/g" /etc/php5/cgi/php.ini
+sed -i "s/disable_functions =/disable_functions = show_source, system, shell_exec, passthru, exec, phpinfo, popen, proc_open/g" /etc/php5/cgi/php.ini
 #
 # ================================================================== #
 #                           Server Security                          #
@@ -974,7 +978,7 @@ echo "Basic Apache security"
 echo "---------------------------------------------------------------"
 #
 sed -i "s/ServerTokens OS/ServerTokens Prod/g" /etc/apache2/conf.d/security
-sed -i "s/ServerSignature On/ServerSignature off/g" /etc/apache2/conf.d/security
+sed -i "s/ServerSignature On/ServerSignature Off/g" /etc/apache2/conf.d/security
 #
 echo
 echo
