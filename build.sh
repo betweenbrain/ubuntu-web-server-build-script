@@ -989,10 +989,10 @@ echo "Fetching OWASP rules for mod_security"
 # https://www.owasp.org/index.php/Category:OWASP_ModSecurity_Core_Rule_Set_Project
 echo "---------------------------------------------------------------"
 #
-wget http://downloads.sourceforge.net/project/mod-security/modsecurity-crs/0-CURRENT/modsecurity-crs_2.2.3.tar.gz
-tar xzf modsecurity-crs_2.2.3.tar.gz
-mv modsecurity-crs_2.2.3 /etc/apache2/modsecurity-crs
-rm -r modsecurity-crs_2.2.3.tar.gz
+wget http://downloads.sourceforge.net/project/mod-security/modsecurity-crs/0-CURRENT/modsecurity-crs_2.2.4.tar.gz
+tar xzf modsecurity-crs_2.2.4.tar.gz
+mv modsecurity-crs_2.2.4 /etc/apache2/modsecurity-crs
+rm -r modsecurity-crs_2.2.4.tar.gz
 #
 echo
 echo
@@ -1116,7 +1116,7 @@ echo "<IfModule security2_module>
 echo
 echo
 echo
-echo "Disabling macro support for numeric operators in ModSecurity CRS v2.2.3. We need ModSecurity 2.5.12 for their support, Lucid uses 2.5.11-1"
+echo "Disabling macro support for numeric operators in ModSecurity CRS v2.2.4. We need ModSecurity 2.5.12 for their support, Lucid uses 2.5.11-1"
 echo "---------------------------------------------------------------"
 #
 sed -i "s/SecAction \"phase:1,id:'981211',t:none,nolog,pass,setvar:tx.max_num_args=255\"/#SecAction \"phase:1,id:'981211',t:none,nolog,pass,setvar:tx.max_num_args=255\"/g" /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf
@@ -1132,7 +1132,7 @@ sed -i "s/%{tx.max_num_args}/255/g" /etc/apache2/modsecurity-crs/base_rules/mods
 echo
 echo
 echo
-echo "Fixing backward compatability issue in ModSecurity CRS v2.2.3. REQBODY_ERROR renamed to  REQBODY_PROCESSOR_ERROR in ModSecurity 2.6.0"
+echo "Fixing backward compatability issue in ModSecurity CRS v2.2.4. REQBODY_ERROR renamed to  REQBODY_PROCESSOR_ERROR in ModSecurity 2.6.0"
 # http://permalink.gmane.org/gmane.comp.apache.mod-security.owasp-crs/411
 echo "---------------------------------------------------------------"
 #
