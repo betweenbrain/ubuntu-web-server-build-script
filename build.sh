@@ -766,7 +766,7 @@ echo
 echo "Configuring apach mpm worker module"
 echo "--------------------------------------------------------------"
 #
-echo "<IfModule mpm_worker_module>
+echo "<IfModule worker.c>
     # Combined with ThreadLimit to set maximum configured value for MaxClients
     # Default 16
     # ServerLimit           16
@@ -778,14 +778,6 @@ echo "<IfModule mpm_worker_module>
     # Number of child server processes created on startup
     # Default 3
     StartServers            2
-
-    # Minimum number of idle child server processes
-    # Default 5
-    MinSpareServers         5
-
-    # Maximum number of idle child server processes
-    # Default 10
-    MaxSpareServers         10
 
     # Minimum number of idle threads to handle request spikes
     # Default 75
