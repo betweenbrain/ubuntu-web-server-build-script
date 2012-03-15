@@ -149,7 +149,7 @@ echo "
 
 enabled  = true
 filter   = modsecurity
-action   = iptables-multiport[name=ModSecurity-$DOMAIN, port="http,https"]
+action   = iptables-multiport[name=ModSecurity-$DOMAIN, port=\"http,https\"]
            sendmail-buffered[name=ModSecurity, lines=10, dest=webmaster@$DOMAIN]
 logpath  = /home/$USER/public_html/$DOMAIN/log/*error.log
 bantime  = 600

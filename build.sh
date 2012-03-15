@@ -501,18 +501,18 @@ echo "<VirtualHost *:80>
 	    SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
 	    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
 
-	    <FilesMatch "\.(cgi|shtml|phtml|php)$">
+	    <FilesMatch \".(cgi|shtml|phtml|php)$\">
 		    SSLOptions +StdEnvVars
 	    </FilesMatch>
 	    <Directory /usr/lib/cgi-bin>
 		    SSLOptions +StdEnvVars
 	    </Directory>
 
-	    BrowserMatch "MSIE [2-6]" \
-		    nokeepalive ssl-unclean-shutdown \
+	    BrowserMatch \"MSIE [2-6]\" \\
+		    nokeepalive ssl-unclean-shutdown \\
 		    downgrade-1.0 force-response-1.0
 	    # MSIE 7 and newer should be able to use keepalive
-	    BrowserMatch "MSIE [17-9]" ssl-unclean-shutdown
+	    BrowserMatch \"MSIE [17-9]\" ssl-unclean-shutdown
 
     </VirtualHost>
 </IfModule>
@@ -560,25 +560,6 @@ echo "/home/$USER/public_html/$DOMAIN/log/*.log {
 echo
 echo
 echo
-echo "Adding mod_security monitoring to fail2ban for $DOMAIN"
-# based on http://www.fail2ban.org/wiki/index.php/HOWTO_fail2ban_with_ModSecurity2.5
-echo "---------------------------------------------------------------"
-#
-echo "
-[modsecurity-$DOMAIN]
-
-enabled  = true
-filter   = modsecurity
-action   = iptables-multiport[name=ModSecurity-$DOMAIN, port="http,https"]
-           sendmail-buffered[name=ModSecurity, lines=10, dest=webmaster@$DOMAIN]
-logpath  = /home/$USER/public_html/$DOMAIN/log/*error.log
-bantime  = 600
-maxretry = 3
-" >> /etc/fail2ban/jail.local
-#
-echo
-echo
-echo
 echo "Enabling site $DOMAIN, restarting apache"
 echo "--------------------------------------------------------------"
 #
@@ -616,51 +597,51 @@ echo "<IfModule mod_expires.c>
     ExpiresActive On
 
     # Default expiration: 1 hour after request
-    ExpiresDefault "now plus 1 hour"
+    ExpiresDefault \"now plus 1 hour\"
 
     # CSS and JS expiration: 1 week after request
-    ExpiresByType text/css "now plus 1 week"
-    ExpiresByType application/javascript "now plus 1 week"
-    ExpiresByType application/x-javascript "now plus 1 week"
+    ExpiresByType text/css \"now plus 1 week\"
+    ExpiresByType application/javascript \"now plus 1 week\"
+    ExpiresByType application/x-javascript \"now plus 1 week\"
 
     # Image files expiration: 1 month after request
-    ExpiresByType image/bmp "now plus 1 month"
-    ExpiresByType image/gif "now plus 1 month"
-    ExpiresByType image/jpeg "now plus 1 month"
-    ExpiresByType image/jp2 "now plus 1 month"
-    ExpiresByType image/pipeg "now plus 1 month"
-    ExpiresByType image/png "now plus 1 month"
-    ExpiresByType image/svg+xml "now plus 1 month"
-    ExpiresByType image/tiff "now plus 1 month"
-    ExpiresByType image/vnd.microsoft.icon "now plus 1 month"
-    ExpiresByType image/x-icon "now plus 1 month"
-    ExpiresByType image/ico "now plus 1 month"
-    ExpiresByType image/icon "now plus 1 month"
-    ExpiresByType text/ico "now plus 1 month"
-    ExpiresByType application/ico "now plus 1 month"
-    ExpiresByType image/vnd.wap.wbmp "now plus 1 month"
-    ExpiresByType application/vnd.wap.wbxml "now plus 1 month"
-    ExpiresByType application/smil "now plus 1 month"
+    ExpiresByType image/bmp \"now plus 1 month\"
+    ExpiresByType image/gif \"now plus 1 month\"
+    ExpiresByType image/jpeg \"now plus 1 month\"
+    ExpiresByType image/jp2 \"now plus 1 month\"
+    ExpiresByType image/pipeg \"now plus 1 month\"
+    ExpiresByType image/png \"now plus 1 month\"
+    ExpiresByType image/svg+xml \"now plus 1 month\"
+    ExpiresByType image/tiff \"now plus 1 month\"
+    ExpiresByType image/vnd.microsoft.icon \"now plus 1 month\"
+    ExpiresByType image/x-icon \"now plus 1 month\"
+    ExpiresByType image/ico \"now plus 1 month\"
+    ExpiresByType image/icon \"now plus 1 month\"
+    ExpiresByType text/ico \"now plus 1 month\"
+    ExpiresByType application/ico \"now plus 1 month\"
+    ExpiresByType image/vnd.wap.wbmp \"now plus 1 month\"
+    ExpiresByType application/vnd.wap.wbxml \"now plus 1 month\"
+    ExpiresByType application/smil \"now plus 1 month\"
 
     # Audio files expiration: 1 month after request
-    ExpiresByType audio/basic "now plus 1 month"
-    ExpiresByType audio/mid "now plus 1 month"
-    ExpiresByType audio/midi "now plus 1 month"
-    ExpiresByType audio/mpeg "now plus 1 month"
-    ExpiresByType audio/x-aiff "now plus 1 month"
-    ExpiresByType audio/x-mpegurl "now plus 1 month"
-    ExpiresByType audio/x-pn-realaudio "now plus 1 month"
-    ExpiresByType audio/x-wav "now plus 1 month"
+    ExpiresByType audio/basic \"now plus 1 month\"
+    ExpiresByType audio/mid \"now plus 1 month\"
+    ExpiresByType audio/midi \"now plus 1 month\"
+    ExpiresByType audio/mpeg \"now plus 1 month\"
+    ExpiresByType audio/x-aiff \"now plus 1 month\"
+    ExpiresByType audio/x-mpegurl \"now plus 1 month\"
+    ExpiresByType audio/x-pn-realaudio \"now plus 1 month\"
+    ExpiresByType audio/x-wav \"now plus 1 month\"
 
     # Movie files expiration: 1 month after request
-    ExpiresByType application/x-shockwave-flash "now plus 1 month"
-    ExpiresByType x-world/x-vrml "now plus 1 month"
-    ExpiresByType video/x-msvideo "now plus 1 month"
-    ExpiresByType video/mpeg "now plus 1 month"
-    ExpiresByType video/mp4 "now plus 1 month"
-    ExpiresByType video/quicktime "now plus 1 month"
-    ExpiresByType video/x-la-asf "now plus 1 month"
-    ExpiresByType video/x-ms-asf "now plus 1 month"
+    ExpiresByType application/x-shockwave-flash \"now plus 1 month\"
+    ExpiresByType x-world/x-vrml \"now plus 1 month\"
+    ExpiresByType video/x-msvideo \"now plus 1 month\"
+    ExpiresByType video/mpeg \"now plus 1 month\"
+    ExpiresByType video/mp4 \"now plus 1 month\"
+    ExpiresByType video/quicktime \"now plus 1 month\"
+    ExpiresByType video/x-la-asf \"now plus 1 month\"
+    ExpiresByType video/x-ms-asf \"now plus 1 month\"
 </IfModule>
 " >> /etc/apache2/conf.d/mod-expires.conf
 #
@@ -691,7 +672,7 @@ echo "<IfModule mod_deflate.c>
         BrowserMatch \bMSI[E] !no-gzip !gzip-only-text/html
 
         # Don't compress images
-        SetEnvIfNoCase Request_URI \
+        SetEnvIfNoCase Request_URI \\
         \.(?:gif|jpe?g|png)$ no-gzip dont-vary
 
         # Make sure proxies don't deliver the wrong content
@@ -762,7 +743,7 @@ echo "<IfModule mod_fcgid.c>
   AddHandler fcgid-script .fcgi .php
 
   # Where to look for the php.ini file?
-  DefaultInitEnv PHPRC        "/etc/php5/cgi"
+  DefaultInitEnv PHPRC        \"/etc/php5/cgi\"
 
   # Maximum number of PHP processes
   # Default 1000
@@ -954,9 +935,19 @@ echo "
 
 enabled  = true
 filter   = modsecurity
-action   = iptables-multiport[name=ModSecurity, port="http,https"]
+action   = iptables-multiport[name=ModSecurity, port=\"http,https\"]
            sendmail-buffered[name=ModSecurity, lines=10, dest=$ADMINEMAIL]
 logpath  = /var/log/apache*/*error.log
+bantime  = 600
+maxretry = 3
+
+[modsecurity-$DOMAIN]
+
+enabled  = true
+filter   = modsecurity
+action   = iptables-multiport[name=ModSecurity-$DOMAIN, port=\"http,https\"]
+           sendmail-buffered[name=ModSecurity, lines=10, dest=webmaster@$DOMAIN]
+logpath  = /home/$USER/public_html/$DOMAIN/log/*error.log
 bantime  = 600
 maxretry = 3
 " >> /etc/fail2ban/jail.local
