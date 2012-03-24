@@ -52,7 +52,7 @@ echo "<VirtualHost *:80>
         <Directory /home/$USER/public_html/$DOMAIN/www>
             Options FollowSymLinks +ExecCGI
             AddHandler fcgid-script .php
-            FCGIWrapper /var/www/php-fcgi-scripts/$DOMAIN/php-fcgi-starter .php
+            FCGIWrapper /var/www/php-fcgi-scripts/$DOMAIN/php-wrapper .php
             AllowOverride All
             Order allow,deny
             Allow from all
@@ -99,7 +99,7 @@ echo "<VirtualHost *:80>
             <Directory /home/$USER/public_html/$DOMAIN/www>
                 Options FollowSymLinks +ExecCGI
                 AddHandler fcgid-script .php
-                FCGIWrapper /var/www/php-fcgi-scripts/$DOMAIN/php-fcgi-starter .php
+                FCGIWrapper /var/www/php-fcgi-scripts/$DOMAIN/php-wrapper .php
                 AllowOverride All
                 Order allow,deny
                 Allow from all
@@ -125,9 +125,9 @@ export PHPRC=/etc/php5/cgi/
 export PHP_FCGI_MAX_REQUESTS=1000
 export PHP_FCGI_CHILDREN=0
 exec /usr/lib/cgi-bin/php
-" > /var/www/php-fcgi-scripts/$DOMAIN/php-fcgi-starter
+" > /var/www/php-fcgi-scripts/$DOMAIN/php-wrapper
 #
-chmod 755 /var/www/php-fcgi-scripts/$DOMAIN/php-fcgi-starter
+chmod 755 /var/www/php-fcgi-scripts/$DOMAIN/php-wrapper
 #
 chown -R $USER:$USER /var/www/php-fcgi-scripts/$DOMAIN
 #
