@@ -514,6 +514,19 @@ echo "<VirtualHost *:80>
 	    # MSIE 7 and newer should be able to use keepalive
 	    BrowserMatch \"MSIE [17-9]\" ssl-unclean-shutdown
 
+        <IfModule mod_fcgid.c>
+            SuexecUserGroup $USER $USER
+            <Directory /home/$USER/public_html/$DOMAIN/www>
+                Options FollowSymLinks +ExecCGI
+                AddHandler fcgid-script .php
+                FCGIWrapper /var/www/php-fcgi-scripts/$DOMAIN/php-fcgi-starter .php
+                AllowOverride All
+                Order allow,deny
+                Allow from all
+                DirectoryIndex index.php index.html
+            </Directory>
+        </IfModule>
+
     </VirtualHost>
 </IfModule>
 " > /etc/apache2/sites-available/$DOMAIN
@@ -528,10 +541,9 @@ mkdir /var/www/php-fcgi-scripts/
 mkdir /var/www/php-fcgi-scripts/$DOMAIN/
 #
 echo "#!/bin/sh
-PHPRC=/etc/php5/cgi/
-export PHPRC
-export PHP_FCGI_MAX_REQUESTS=5000
-export PHP_FCGI_CHILDREN=1
+export PHPRC=/etc/php5/cgi/
+export PHP_FCGI_MAX_REQUESTS=1000
+export PHP_FCGI_CHILDREN=0
 exec /usr/lib/cgi-bin/php
 " > /var/www/php-fcgi-scripts/$DOMAIN/php-fcgi-starter
 #
@@ -739,25 +751,27 @@ echo
 echo "Configuring fcgid"
 echo "--------------------------------------------------------------"
 #
-echo "<IfModule mod_fcgid.c>
-  AddHandler fcgid-script .fcgi .php
+echo "AddHandler fcgid-script .fcgi .php
 
-  # Where to look for the php.ini file?
-  DefaultInitEnv PHPRC        \"/etc/php5/cgi\"
+# Location of php.ini file
+DefaultInitEnv PHPRC        \"/etc/php5/cgi\"
 
-  # Maximum number of PHP processes
-  # Default 1000
-  FcgidMaxProcesses         10
+# Maximum number of PHP processes
+# Default 1000
+FcgidMaxProcesses           10
 
-  # Number of seconds of idle time before a process is terminated
-  # Default 40
-  FcgidIOTimeout            30
-  # Default 300
-  FcgidIdleTimeout          120
+# Number of seconds of idle time before a process is terminated
+# Default 40
+FcgidIOTimeout              10
+# Default 300
+FcgidIdleTimeout            120
 
-  #Or use this if you use the file above
-  FCGIWrapper /usr/bin/php-cgi .php
-</IfModule>
+# Idle application processes which have existed for greater than this time will be terminated
+# Default 3600
+FcgidProcessLifeTime        60
+
+#Or use this if you use the file above
+FCGIWrapper /usr/bin/php-cgi .php
 " > /etc/apache2/conf.d/php-fcgid.conf
 #
 echo
@@ -766,44 +780,42 @@ echo
 echo "Configuring apach mpm worker module"
 echo "--------------------------------------------------------------"
 #
-echo "<IfModule worker.c>
-    # Combined with ThreadLimit to set maximum configured value for MaxClients
-    # Default 16
-    # ServerLimit           16
+echo "# Combined with ThreadLimit to set maximum configured value for MaxClients
+# Default 16
+ServerLimit             10
 
-    # Sets the maximum configured value for ThreadsPerChild
-    # Default 64
-    # ThreadLimit           64
+# Sets the maximum configured value for ThreadsPerChild
+# Default 64
+# ThreadLimit           64
 
-    # Number of child server processes created on startup
-    # Default 3
-    StartServers            2
+# Number of child server processes created on startup
+# Default 3
+StartServers            2
 
-    # Minimum number of idle threads to handle request spikes
-    # Default 75
-    MinSpareThreads         5
+# Minimum number of idle threads to handle request spikes
+# Default 75
+MinSpareThreads         5
 
-    # Minimum number of idle threads to handle request spikes
-    # Default 250
-    MaxSpareThreads         10
+# Minimum number of idle threads to handle request spikes
+# Default 250
+MaxSpareThreads         10
 
-    # Number of threads created by each child process
-    # Default 25
-    ThreadsPerChild         10
+# Number of threads created by each child process
+# Default 25
+ThreadsPerChild         10
 
-    # Number of simultaneous requests that will be served, integer multiple of ThreadsPerChild
-    # Default 16
-    # Linode 512: MaxClients 25 or less
-    # Linode 1024: MaxClients 50 or less
-    # Linode 1536: MaxClients 75 or less
-    # Linode 2048: MaxClients 100 or less
-    MaxClients              20
+# Number of simultaneous requests that will be served, integer multiple of ThreadsPerChild
+# Default 16
+# Linode 512: MaxClients 25 or less
+# Linode 1024: MaxClients 50 or less
+# Linode 1536: MaxClients 75 or less
+# Linode 2048: MaxClients 100 or less
+MaxClients              20
 
-    # Number of requests that an individual child server process will handle
-    # Default 1000
-    # 0 = process will never expire
-    MaxRequestsPerChild     100
-</IfModule>
+# Number of requests that an individual child server process will handle
+# Default 1000
+# 0 = process will never expire
+MaxRequestsPerChild     100
 "  > /etc/apache2/conf.d/mpm-worker.conf
 #
 echo
@@ -816,7 +828,7 @@ echo "--------------------------------------------------------------"
 sed -i "s/memory_limit = 128M/memory_limit = 48M/g" /etc/php5/cgi/php.ini
 sed -i "s/upload_max_filesize = 2M/upload_max_filesize = 20M/g" /etc/php5/cgi/php.ini
 sed -i "s/output_buffering = 4096/output_buffering = Off/g" /etc/php5/cgi/php.ini
-# sed -i "s/allow_url_fopen = On/allow_url_fopen = Off/g" /etc/php5/cgi/php.ini
+sed -i "s/allow_url_fopen = On/allow_url_fopen = Off/g" /etc/php5/cgi/php.ini
 sed -i "s/expose_php = On/expose_php = Off/g" /etc/php5/cgi/php.ini
 sed -i "s/disable_functions =/disable_functions = show_source, system, shell_exec, passthru, exec, phpinfo, popen, proc_open/g" /etc/php5/cgi/php.ini
 #

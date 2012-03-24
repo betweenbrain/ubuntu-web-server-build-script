@@ -94,6 +94,19 @@ echo "<VirtualHost *:80>
 	    # MSIE 7 and newer should be able to use keepalive
 	    BrowserMatch "MSIE [17-9]" ssl-unclean-shutdown
 
+        <IfModule mod_fcgid.c>
+            SuexecUserGroup $USER $USER
+            <Directory /home/$USER/public_html/$DOMAIN/www>
+                Options FollowSymLinks +ExecCGI
+                AddHandler fcgid-script .php
+                FCGIWrapper /var/www/php-fcgi-scripts/$DOMAIN/php-fcgi-starter .php
+                AllowOverride All
+                Order allow,deny
+                Allow from all
+                DirectoryIndex index.php index.html
+            </Directory>
+        </IfModule>
+
     </VirtualHost>
 </IfModule>
 " > /etc/apache2/sites-available/$DOMAIN
@@ -108,10 +121,9 @@ mkdir /var/www/php-fcgi-scripts/
 mkdir /var/www/php-fcgi-scripts/$DOMAIN/
 #
 echo "#!/bin/sh
-PHPRC=/etc/php5/cgi/
-export PHPRC
-export PHP_FCGI_MAX_REQUESTS=5000
-export PHP_FCGI_CHILDREN=1
+export PHPRC=/etc/php5/cgi/
+export PHP_FCGI_MAX_REQUESTS=1000
+export PHP_FCGI_CHILDREN=0
 exec /usr/lib/cgi-bin/php
 " > /var/www/php-fcgi-scripts/$DOMAIN/php-fcgi-starter
 #
