@@ -81,18 +81,18 @@ echo "<VirtualHost *:80>
 	    SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
 	    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
 
-	    <FilesMatch "\.(cgi|shtml|phtml|php)$">
+	    <FilesMatch \"\.(cgi|shtml|phtml|php)$\">
 		    SSLOptions +StdEnvVars
 	    </FilesMatch>
 	    <Directory /usr/lib/cgi-bin>
 		    SSLOptions +StdEnvVars
 	    </Directory>
 
-	    BrowserMatch "MSIE [2-6]" \
-		    nokeepalive ssl-unclean-shutdown \
+	    BrowserMatch \"MSIE [2-6]\" \\
+		    nokeepalive ssl-unclean-shutdown \\
 		    downgrade-1.0 force-response-1.0
 	    # MSIE 7 and newer should be able to use keepalive
-	    BrowserMatch "MSIE [17-9]" ssl-unclean-shutdown
+	    BrowserMatch \"MSIE [17-9]\" ssl-unclean-shutdown
 
         <IfModule mod_fcgid.c>
             SuexecUserGroup $USER $USER
@@ -115,6 +115,7 @@ echo
 echo
 echo
 echo "Creating fcgi wrapper for $DOMAIN, making it executable and setting owner"
+# http://httpd.apache.org/mod_fcgid/mod/mod_fcgid.html
 echo "--------------------------------------------------------------"
 #
 mkdir /var/www/php-fcgi-scripts/
@@ -144,7 +145,7 @@ echo "/home/$USER/public_html/$DOMAIN/log/*.log {
     compress
     delaycompress
     notifempty
-    create 655 $USER $USER
+    create 640 $USER $USER
     olddir /home/$USER/public_html/$DOMAIN/log/old/
 }
 " > /etc/logrotate.d/$DOMAIN
@@ -152,7 +153,7 @@ echo "/home/$USER/public_html/$DOMAIN/log/*.log {
 echo
 echo
 echo
-echo "Adding mod_security monitoring to fail2ban for $DOMAIN"
+echo "Adding mod_security monitoring to fail2ban"
 # based on http://www.fail2ban.org/wiki/index.php/HOWTO_fail2ban_with_ModSecurity2.5
 echo "---------------------------------------------------------------"
 #
@@ -161,7 +162,7 @@ echo "
 
 enabled  = true
 filter   = modsecurity
-action   = iptables-multiport[name=ModSecurity-$DOMAIN, port=\"http,https\"]
+action   = iptables-multiport[name=ModSecurity, port=\"http,https\"]
            sendmail-buffered[name=ModSecurity, lines=10, dest=webmaster@$DOMAIN]
 logpath  = /home/$USER/public_html/$DOMAIN/log/*error.log
 bantime  = 600
@@ -171,25 +172,10 @@ maxretry = 3
 echo
 echo
 echo
-echo "Adding logwatch for log monitoring"
-# https://help.ubuntu.com/community/Logwatch
-echo "--------------------------------------------------------------"
-#
-echo "
-# Log files for $DOMAIN
-LogFile = /home/$USER/public_html/$DOMAIN/log/access.log
-LogFile = /home/$USER/public_html/$DOMAIN/log/error.log
-LogFile = /home/$USER/public_html/$DOMAIN/log/ssl_error.log
-LogFile = /home/$USER/public_html/$DOMAIN/log/ssl_access.log
-" >> /etc/logwatch/conf/logfiles/http.conf
-#
-echo
-echo
-echo
 echo "Enabling site $DOMAIN, restarting apache"
 echo "--------------------------------------------------------------"
 #
 a2ensite $DOMAIN
-/etc/init.d/apache2 restart
+/etc/init.d/apache2 graceful
 #
 
