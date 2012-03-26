@@ -501,7 +501,7 @@ echo "<VirtualHost *:80>
 	    SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
 	    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
 
-	    <FilesMatch \"\\.(cgi|shtml|phtml|php)$\">
+	    <FilesMatch \"\.(cgi|shtml|phtml|php)$\">
 		    SSLOptions +StdEnvVars
 	    </FilesMatch>
 	    <Directory /usr/lib/cgi-bin>
@@ -703,7 +703,10 @@ echo "---------------------------------------------------------------"
 echo "# Keep connections alive for only a few seconds
 KeepAlive On
 KeepAliveTimeout 3
-" >> /etc/apache2/conf.d/apache2-custom.conf
+
+# Allow named virtual hosts on port 443
+NameVirtualHost *:443
+" >> /etc/apache2/httpd.conf
 #
 echo
 echo
@@ -950,7 +953,7 @@ maxretry = 3
 
 enabled  = true
 filter   = modsecurity
-action   = iptables-multiport[name=ModSecurity-$DOMAIN, port=\"http,https\"]
+action   = iptables-multiport[name=ModSecurity, port=\"http,https\"]
            sendmail-buffered[name=ModSecurity, lines=10, dest=webmaster@$DOMAIN]
 logpath  = /home/$USER/public_html/$DOMAIN/log/*error.log
 bantime  = 600
