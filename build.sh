@@ -762,11 +762,11 @@ DefaultInitEnv PHPRC        \"/etc/php5/cgi\"
 
 # Maximum number of PHP processes
 # Default 1000
-FcgidMaxProcesses           10
+FcgidMaxProcesses           100
 
 # Number of seconds of idle time before a process is terminated
 # Default 40
-FcgidIOTimeout              10
+FcgidIOTimeout              30
 # Default 300
 FcgidIdleTimeout            120
 
