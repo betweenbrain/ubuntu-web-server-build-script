@@ -379,6 +379,7 @@ echo
 echo
 echo "Install and configure postfix as email gateway (send only)"
 # http://library.linode.com/email/postfix/gateway-ubuntu-10.04-lucid
+echo "The value you assign as your system's FQDN should have an \"A\" record in DNS pointing to your IPv4 address."
 echo "---------------------------------------------------------------"
 #
 echo "postfix postfix/main_mailer_type select Internet Site" | debconf-set-selections
@@ -389,8 +390,6 @@ aptitude -y install postfix mailutils
 #
 ln -s /usr/bin/mail /bin/mail
 #
-sed -i "s/myhostname =/#myhostname =/g" /etc/postfix/main.cf
-echo "myhostname = $HOSTNAME" >> /etc/postfix/main.cf
 sed -i "s/#myorigin = \/etc\/mailname/myorigin = $DOMAIN/g" /etc/postfix/main.cf
 #
 echo
@@ -1016,6 +1015,7 @@ echo
 echo "Adding custom OWASP configuration"
 # http://permalink.gmane.org/gmane.comp.apache.mod-security.user/8735
 # https://ppmts.custhelp.com/app/answers/detail/a_id/92
+# http://www.modsecurity.org/blog/archives/intrusion_detection/ - see Handling False Positives Using Exceptions
 echo "---------------------------------------------------------------"
 #
 echo "# Whitelisting notify.paypal.com(IPN)
