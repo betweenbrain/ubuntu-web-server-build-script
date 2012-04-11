@@ -46,16 +46,35 @@ Here are a few ideas:
 `sed -i "s/#long_query_time/long_query_time/g" /etc/mysql/my.cnf`
   *   Set query cache type: `sed -i "s/query_cache_size        = 16M/query_cache_size        = 16M\nquery_cache_type        = 1\n/g" /etc/mysql/my.cnf`
   *   Enable table cache: `sed -i "s/#table_cache/table_cache/g" /etc/mysql/my.cnf`
+
 *   Keep an eye on your logs and adjust mod_security / fail2ban accordingly
+
 *   Keep things up to date. For example `sudo aptitude safe-upgrade`
+
 *   Add a new database, with a corresponding user, with [add-db.sh](https://github.com/betweenbrain/ubuntu-web-server-build-script/blob/master/admin-scripts/add-db.sh)
+
 *   Add email aliases to postfix:
   *  `sudo nano /etc/postfix/virtual`
   *  Add: `alias email@foo.bar`
   *  `sudo postmap /etc/postfix/virtual`
   *  `sudo service postfix reload`
+
 *  Make sure that you own your bash history file `sudo chown you:you ~/.bash_history`
 
+* Install and configure <a href="http://www.ossec.net/">OSSEC</a>
+- sources http://ubuntuforums.org/showthread.php?t=213445 | http://ossec.net/ossec-docs/OSSEC-book-Ch02_SA240.pdf | http://devio.us/~ddp/ossec/docs/manual/installation/
+  *  `sudo apt-get install build-essential`
+  *  `wget http://www.ossec.net/files/ossec-hids-latest.tar.gz`
+  *  `wget http://www.ossec.net/files/ossec-hids-2.6_checksum.txt` <= if latest is version 2.6, see http://www.ossec.net/main/downloads
+  *  `cat ossec-hids-2.6_checksum.txt`
+  *  `md5sum ossec-hids-2.6_checksum.txt`
+  *  `sha1sum ossec-hids-2.6_checksum.txt`
+  *  `tar -zxvf ossec-hids-*.tar.gz`
+  *  `cd ossec-hids-*`
+  *  `./install.sh`
+
+- OSSEC documentation: http://www.ossec.net/main/manual
+- conf file at /var/ossec/etc/ossec.conf
 
 Warranty, guarantees, culpability...etc.
 ----------------
