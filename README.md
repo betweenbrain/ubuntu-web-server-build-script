@@ -67,14 +67,14 @@ Here are a few ideas:
   *  `wget http://www.ossec.net/files/ossec-hids-latest.tar.gz`
   *  `wget http://www.ossec.net/files/ossec-hids-2.6_checksum.txt` <= if latest is version 2.6, see http://www.ossec.net/main/downloads
   *  `cat ossec-hids-2.6_checksum.txt`
-  *  `md5sum ossec-hids-2.6_checksum.txt`
-  *  `sha1sum ossec-hids-2.6_checksum.txt`
+  *  `md5sum ossec-hids-latest.tar.gz`
+  *  `sha1sum ossec-hids-latest.tar.gz`
   *  `tar -zxvf ossec-hids-*.tar.gz`
   *  `cd ossec-hids-*`
-  *  `./install.sh`
+  *  `sudo ./install.sh`
 
-- OSSEC documentation: http://www.ossec.net/main/manual
-- conf file at /var/ossec/etc/ossec.conf
+  * OSSEC documentation: http://www.ossec.net/main/manual
+  * conf file at /var/ossec/etc/ossec.conf
 
 Warranty, guarantees, culpability...etc.
 ----------------
