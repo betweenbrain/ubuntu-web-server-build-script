@@ -862,6 +862,9 @@ sed -i "s/#net.ipv4.conf.all.log_martians = 1/net.ipv4.conf.all.log_martians = 1
 echo "#
 # Controls the use of TCP syncookies
 net.ipv4.tcp_synack_retries = 2
+
+# Increasing free memory
+vm.min_free_kbytes = 16384
 " >> /etc/sysctl.conf
 #
 sysctl -p
