@@ -304,7 +304,7 @@ iptables -A INPUT -p tcp --dport 443 -m limit --limit 25/minute --limit-burst 10
 # Log dropped packets
 iptables -N LOGGING
 iptables -A INPUT -j LOGGING
-iptables -I INPUT 5 -m limit --limit 5/min -j LOG --log-prefix "Iptables denied: " --log-level 7
+iptables -I INPUT -m limit --limit 5/min -j LOG --log-prefix "Iptables Dropped Packet: " --log-level 7
 iptables -A LOGGING -j DROP
 
 # Create the script to load the rules
