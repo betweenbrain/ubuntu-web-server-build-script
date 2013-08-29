@@ -1001,7 +1001,7 @@ echo "Fetching OWASP rules for mod_security"
 echo "---------------------------------------------------------------"
 #
 aptitude -y install git-core
-git clone git@github.com:SpiderLabs/owasp-modsecurity-crs.git /etc/apache2/modsecurity-crs
+git clone https://github.com/SpiderLabs/owasp-modsecurity-crs.git /etc/apache2/modsecurity-crs
 #
 echo
 echo
@@ -1009,7 +1009,8 @@ echo
 echo "Enabling OWASP example configuration"
 echo "---------------------------------------------------------------"
 #
-mv /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf.example /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf
+rm /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf
+mv /etc/apache2/modsecurity-crs/modsecurity_crs_10_setup.conf.example /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf
 #
 echo
 echo
@@ -1020,12 +1021,12 @@ echo "Adding custom OWASP configuration"
 # http://www.modsecurity.org/blog/archives/intrusion_detection/ - see Handling False Positives Using Exceptions
 echo "---------------------------------------------------------------"
 #
-echo "# Whitelisting notify.paypal.com(IPN)
-SecRule REMOTE_ADDR \"@streq 216.113.188.202\" \"phase:1,allow,ctl:ruleEngine=off,msg:'Disabling rule-engine for IP %{REMOTE_ADDR}'\"
-SecRule REMOTE_ADDR \"@streq 216.113.188.203\" \"phase:1,allow,ctl:ruleEngine=off,msg:'Disabling rule-engine for IP %{REMOTE_ADDR}'\"
-SecRule REMOTE_ADDR \"@streq 216.113.188.204\" \"phase:1,allow,ctl:ruleEngine=off,msg:'Disabling rule-engine for IP %{REMOTE_ADDR}'\"
-SecRule REMOTE_ADDR \"@streq 66.211.170.66\" \"phase:1,allow,ctl:ruleEngine=off,msg:'Disabling rule-engine for IP %{REMOTE_ADDR}'\"
-" > /etc/apache2/modsecurity-crs/modsecurity_crs_15_custom.conf
+# echo "# Whitelisting notify.paypal.com(IPN)
+# SecRule REMOTE_ADDR \"@streq 216.113.188.202\" \"phase:1,allow,ctl:ruleEngine=off,msg:'Disabling rule-engine for IP %{REMOTE_ADDR}'\"
+# SecRule REMOTE_ADDR \"@streq 216.113.188.203\" \"phase:1,allow,ctl:ruleEngine=off,msg:'Disabling rule-engine for IP %{REMOTE_ADDR}'\"
+# SecRule REMOTE_ADDR \"@streq 216.113.188.204\" \"phase:1,allow,ctl:ruleEngine=off,msg:'Disabling rule-engine for IP %{REMOTE_ADDR}'\"
+# SecRule REMOTE_ADDR \"@streq 66.211.170.66\" \"phase:1,allow,ctl:ruleEngine=off,msg:'Disabling rule-engine for IP %{REMOTE_ADDR}'\"
+# " > /etc/apache2/modsecurity-crs/modsecurity_crs_15_custom.conf
 #
 echo
 echo
@@ -1122,31 +1123,6 @@ echo "<IfModule security2_module>
     Include modsecurity-crs/activated_rules/*.conf
 </IfModule>
 " > /etc/apache2/conf.d/modsecurity
-#
-echo
-echo
-echo
-echo "Disabling macro support for numeric operators in ModSecurity CRS v2.2.4. We need ModSecurity 2.5.12 for their support, Lucid uses 2.5.11-1"
-echo "---------------------------------------------------------------"
-#
-sed -i "s/SecAction \"phase:1,id:'981211',t:none,nolog,pass,setvar:tx.max_num_args=255\"/#SecAction \"phase:1,id:'981211',t:none,nolog,pass,setvar:tx.max_num_args=255\"/g" /etc/apache2/modsecurity-crs/modsecurity_crs_10_config.conf
-#
-echo
-echo
-echo
-echo "Hardcoding a numeric value in place of disabled tx.max_num_args operator"
-echo "---------------------------------------------------------------"
-#
-sed -i "s/%{tx.max_num_args}/255/g" /etc/apache2/modsecurity-crs/base_rules/modsecurity_crs_23_request_limits.conf
-#
-echo
-echo
-echo
-echo "Fixing backward compatability issue in ModSecurity CRS v2.2.4. REQBODY_ERROR renamed to  REQBODY_PROCESSOR_ERROR in ModSecurity 2.6.0"
-# http://permalink.gmane.org/gmane.comp.apache.mod-security.owasp-crs/411
-echo "---------------------------------------------------------------"
-#
-sed -i "s/REQBODY_ERROR/REQBODY_PROCESSOR_ERROR/g" /etc/apache2/modsecurity-crs/base_rules/modsecurity_crs_20_protocol_violations.conf
 #
 echo
 echo
