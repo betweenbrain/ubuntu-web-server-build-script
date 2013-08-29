@@ -999,10 +999,8 @@ echo "Fetching OWASP rules for mod_security"
 # https://www.owasp.org/index.php/Category:OWASP_ModSecurity_Core_Rule_Set_Project
 echo "---------------------------------------------------------------"
 #
-wget http://downloads.sourceforge.net/project/mod-security/modsecurity-crs/0-CURRENT/modsecurity-crs_2.2.4.tar.gz
-tar xzf modsecurity-crs_2.2.4.tar.gz
-mv modsecurity-crs_2.2.4 /etc/apache2/modsecurity-crs
-rm -r modsecurity-crs_2.2.4.tar.gz
+aptitude -y install git-core
+git clone git@github.com:SpiderLabs/owasp-modsecurity-crs.git /etc/apache2/modsecurity-crs
 #
 echo
 echo
